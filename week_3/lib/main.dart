@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'mahasiswa.dart';
 import 'liriklagu.dart';
+import 'detail_lagu.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,6 +29,22 @@ class MyApp extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Cari Judul Lagu',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                Image.asset(
+                  'assets/image.png',
+                  width: 200,
+                  height: 200,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(height: 16),
                 Text(
                   liriklagu.judul,
                   style: const TextStyle(
@@ -43,17 +60,42 @@ class MyApp extends StatelessWidget {
                     color: Color.fromARGB(255, 5, 5, 5),
                   ),
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  liriklagu.bait1,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14, height: 1.5),
+                const SizedBox(height: 16),
+                Builder(
+                  builder: (context) => ElevatedButton(
+                    onPressed: () {
+                      Navigator.push<void>(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (context) => DetailLagu(lagu: liriklagu),
+                        ),
+                      );
+                    },
+                    child: const Text('Detail lagu'),
+                  ),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  liriklagu.bait2,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14, height: 1.5),
+                Card(
+                  color: const Color.fromARGB(255, 174, 206, 212),
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          liriklagu.bait1,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 14, height: 1.5),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          liriklagu.bait2,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 14, height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

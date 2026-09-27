@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'mahasiswa.dart';
 import 'liriklagu.dart';
 import 'detail_lagu.dart';
+import 'camera.dart';
 
 void main() {
   runApp(MyApp());
@@ -38,11 +39,26 @@ class MyApp extends StatelessWidget {
                     ),
                   ),
                 ),
-                Image.asset(
-                  'assets/image.png',
-                  width: 200,
-                  height: 200,
-                  fit: BoxFit.contain,
+                ClipRect(
+                  child: Banner(
+                    message: 'LIRIK',
+                    location: BannerLocation.topEnd,
+                    color: const Color.fromARGB(255, 237, 123, 47),
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    child: Hero(
+                      tag: 'sampul-lagu',
+                      child: Image.asset(
+                        'assets/image.png',
+                        width: 200,
+                        height: 200,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -72,6 +88,43 @@ class MyApp extends StatelessWidget {
                       );
                     },
                     child: const Text('Detail lagu'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Builder(
+                  builder: (context) => OutlinedButton(
+                    onPressed: () {
+                      showDialog<void>(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                          title: const Text('Info lagu'),
+                          scrollable: true,
+                          content: Text(
+                            'Judul: ${liriklagu.judul}\n'
+                            'Penyanyi: ${liriklagu.penyanyi}',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dialogContext),
+                              child: const Text('Tutup'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: const Text('Info lagu'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Builder(
+                  builder: (context) => OutlinedButton(
+                    onPressed: () => Navigator.push<void>(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (context) => const CameraApp(),
+                      ),
+                    ),
+                    child: const Text('Buka kamera'),
                   ),
                 ),
                 const SizedBox(height: 20),

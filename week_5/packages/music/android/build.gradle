@@ -1,0 +1,16 @@
+group 'com.salkuadrat.music'
+version '1.0'
+apply plugin: 'com.android.library'
+android {
+    namespace 'com.salkuadrat.music'
+    compileSdk 36
+    defaultConfig { minSdk 21 }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+dependencies {
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.media:media:1.7.0'
+}

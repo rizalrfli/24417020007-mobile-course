@@ -77,9 +77,9 @@ const _hindiaAlbum = Album(
   coverUrl: 'assets/cover/everything-u-are.png',
   releaseYear: 2019,
 );
-const _oliviaAlbumGuts = Album(
-  id: 'guts-spilled',
-  title: 'GUTS (spilled)',
+const _oliviaAlbum = Album(
+  id: 'you-seem-pretty-sad',
+  title: 'you seem pretty sad for a girl so in love',
   coverUrl: 'assets/cover/honeybee.png',
   releaseYear: 2024,
 );
@@ -129,9 +129,9 @@ const mockSongs = <Song>[
     id: 'honeybee',
     title: 'Honeybee',
     artist: _artistOliviaRodrigo,
-    album: _oliviaAlbumGuts,
+    album: _oliviaAlbum,
     coverUrl: 'assets/cover/honeybee.png',
-    durationSeconds: 153,
+    durationSeconds: 225,
     genre: 'Indie Folk',
     releaseYear: 2024,
   ),
@@ -179,19 +179,46 @@ const mockSongs = <Song>[
 
 const mockLyrics = <String, String>{
   'nina':
+      'Saat engkau tertidur\n'
+      'Aku pergi menghibur\n'
+      'Beda kota, pisah raga, bukan masalahku\n'
+      'Lihat wajahmu di layar, ku tetap bersyukur\n\n'
+      'Saat engkau terjaga\n'
+      'Aku \'kan ada di sana\n'
+      'Sempatkan bermain dan bawakan cendera mata\n'
+      'Satu sampai lima tahun, cepat tak terasa\n\n'
+      'Segala hal kuupayakan untuk melindungi\n'
+      'Tunggu aku kembali lagi esok pagi\n\n'
+      'Tumbuh lebih baik, cari panggilanmu\n'
+      'Jadi lebih baik dibanding diriku\n'
+      '\'Tuk sementara ini aku mengembara jauh\n'
+      'Saat dewasa kau \'kan mengerti\n\n'
+      'Saat engkau dewasa\n'
+      'Dan aku kian menua\n'
+      'Jika ku berpulang lebih awal, tidak apa\n'
+      'Berjumpa lagi di sana, aku tetap sama\n\n'
+      'Saat engkau teringat\n'
+      'Tengkar kita, manakala\n'
+      'Maaf atas perjalanan yang tidak sempurna\n'
+      'Namun percayalah, untukmu kujual dunia\n\n'
+      'Segala hal kuupayakan untuk melindungi\n'
+      'Tunggu aku kembali lagi esok pagi\n\n'
+      'Tumbuh lebih baik, cari panggilanmu\n'
+      'Jadi lebih baik dibanding diriku\n'
+      'Dan tertawalah saat ini selepas-lepasnya\n'
+      'Kar\'na kelak kau \'kan tersakiti\n\n'
+      'Aku tahu kamu hebat\n'
+      'Namun, s\'lamanya diriku pasti berkutat\n'
+      '\'Tuk s\'lalu jauhkanmu dari dunia yang jahat\n'
+      'Ini sumpahku padamu \'tuk biarkanmu\n\n'
+      'Tumbuh lebih baik, cari panggilanmu\n'
+      'Jadi lebih baik dibanding diriku\n'
+      '\'Tuk sementara kita tertawakan berbagai hal\n'
+      'Yang lucu dan lara selepas-lepasnya\n\n'
       'Saat dewasa kau \'kan mengerti\n'
-      'Berapa harga satu hari\n'
-      'Saat dewasa kau \'kan pahami\n'
-      'Mengapa kami jarang di rumah\n\n'
-      'Pasti ada yang dikorbankan\n'
-      'Pasti ada yang dikeluhkan\n'
-      'Tapi kuharap kau \'kan paham\n'
-      'Semua kulakukan untukmu\n\n'
-      'Untuk segala doa yang belum tercapai\n'
-      'Biar kurawat sampai kau siap nanti\n'
-      'Tumbuhlah kuat, jadi manusia\n'
-      'Karna dunia tak selalu ramah\n'
-      'Nina...',
+      'Kar\'na kelak kau \'kan tersakiti\n'
+      'Saat dewasa kau \'kan mengerti\n'
+      'Kar\'na kelak kau \'kan tersakiti',
   'akad':
       'Betapa bahagianya hatiku saat\n'
       'Kududuk berdua denganmu\n'
@@ -250,38 +277,41 @@ const mockLyrics = <String, String>{
       'So I guess that it\'s true\n'
       'Time can heal even the worst of wounds\n'
       'And the clichés I knew\n'
-      'Seem so commonplace when I saw you\n'
+      'Seemed so commonplace when I saw you\n\n'
       'Let\'s just walk in the dark\n'
       'Hop the fence in the park\n'
       'Baby boy, honeybee\n'
       'God, I love the way you look at me\n\n'
       'And it\'s too hard to describe this\n'
-      'In a way that feels honest, but even when I\'m quiet\n'
+      'In a way that feels honest\n'
+      'But even when I\'m quiet\n'
       'I love you, baby, I promise\n'
-      'And I hope I never see what your face looks like goin\'\n'
-      'A face, I swear, that I could spend my whole life knowin\'\n'
-      'Here\'s to hopin\'\n\n'
+      'And I hope I never see what your face looks like going\n'
+      'A face I swear that I could spend my whole life knowing\n'
+      'Here\'s to hoping\n\n'
       'Pick me up, walk me home\n'
-      'Man, it feels like God threw me a bone\n'
+      'And it feels like God threw me a bone\n'
       'Sticky sweet, tangerine\n'
-      'Would you sit and keep me company?\n'
+      'Would you sit and keep me company?\n\n'
       'In the dark, I\'m not scared\n'
       'I just reach and you\'re right there\n'
       'Shooting stars, racing cars\n'
       'Everything I own just feels like ours\n\n'
       'It\'s too hard to describe this\n'
-      'In a way that feels honest, but even when I\'m quiet\n'
+      'In a way that feels honest\n'
+      'But even when I\'m quiet\n'
       'I love you, baby, I promise\n'
-      'And I hope I never see what your face looks like goin\'\n'
-      'A face, I swear, that I could spend my whole life knowin\'\n'
-      'Here\'s to hopin\'\n\n'
-      'I hope I never see what your face looks like goin\'\n'
-      'A face, I swear, that I could spend my whole life knowin\'\n'
-      'Here\'s to hopin\'\n\n'
+      'And I hope I never see what your face looks like going\n'
+      'A face I swear that I could spend my whole life knowing\n'
+      'Here\'s to hoping\n\n'
+      'And I hope I never see what your face looks like going\n'
+      'A face I swear that I could spend my whole life knowing\n'
+      'Here\'s to hoping\n\n'
       'It\'s too hard to describe this\n'
-      'In a way that feels honest, but even when I\'m quiet\n'
+      'In a way that feels honest\n'
+      'But even when I\'m quiet\n'
       'I promise\n'
-      'And I hope I never see what your face looks like goin\'\n'
-      'A face, I swear, that I could spend my whole life knowin\'\n'
-      'Here\'s to hopin\'',
+      'And I hope I never see what your face looks like going\n'
+      'A face I swear that I could spend my whole life knowing\n'
+      'Here\'s to hoping',
 };

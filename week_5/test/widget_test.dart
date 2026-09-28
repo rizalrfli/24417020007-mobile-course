@@ -89,6 +89,7 @@ void main() {
     await tapVisible(tester, find.text('Nina'));
     expect(find.text('Detail lagu'), findsOneWidget);
     expect(find.byType(LyricsView), findsOneWidget);
+    expect(find.textContaining('Saat engkau tertidur'), findsOneWidget);
 
     // Verify history was recorded
     expect(

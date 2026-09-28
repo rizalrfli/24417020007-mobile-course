@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../shared/data/mock_data.dart';
+import '../shared/data/timed_lyrics_data.dart';
 import '../shared/models/music.dart';
 
 final isDemoProvider = Provider<bool>(
@@ -62,6 +63,7 @@ final lyricsProvider = FutureProvider.autoDispose.family<Lyrics, String>((
   }
   return Lyrics(
     text: text,
+    timedLines: mockTimedLyrics[id],
     attribution: song.isDemo
         ? 'Teks contoh orisinal untuk demo LyricWave.'
         : null,

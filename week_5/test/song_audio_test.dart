@@ -7,8 +7,10 @@ import 'package:week_5/app/router.dart';
 import 'package:week_5/features/song/presentation/audio_wave_bar.dart';
 import 'package:week_5/features/song/presentation/song_audio_controller.dart';
 import 'package:week_5/features/song/presentation/song_audio_player.dart';
-import 'package:week_5/shared/data/song_audio_sources.dart';
+import 'package:week_5/features/song/presentation/song_detail_screen.dart';
 import 'package:week_5/shared/data/mock_data.dart';
+import 'package:week_5/shared/data/song_audio_sources.dart';
+import 'package:week_5/shared/models/music.dart';
 
 class FakeMusicPlayer extends MusicPlayer {
   FakeMusicPlayer(this.controller);
@@ -286,6 +288,116 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets(
+    'lyrics synchronization turns lines white one by one as song is sung',
+    (tester) async {
+      const sampleLyrics = Lyrics(
+        timedLines: [
+          LyricLine(startTime: Duration(seconds: 10), text: 'Baris pertama'),
+          LyricLine(startTime: Duration(seconds: 20), text: 'Baris kedua'),
+          LyricLine(startTime: Duration(seconds: 30), text: 'Baris ketiga'),
+        ],
+      );
+
+      // At position 0s: no lines sung yet, all are grey
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: LyricsView(
+              lyrics: sampleLyrics,
+              currentPosition: Duration.zero,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.bySemanticsLabel('Belum dinyanyikan: Baris pertama'),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Belum dinyanyikan: Baris kedua'),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Belum dinyanyikan: Baris ketiga'),
+        findsOneWidget,
+      );
+
+      // At position 12s: first line starts singing -> turns white
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: LyricsView(
+              lyrics: sampleLyrics,
+              currentPosition: Duration(seconds: 12),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.bySemanticsLabel('Sedang dinyanyikan: Baris pertama'),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Belum dinyanyikan: Baris kedua'),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Belum dinyanyikan: Baris ketiga'),
+        findsOneWidget,
+      );
+
+      // At position 25s: second line starts singing -> turns white too
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: LyricsView(
+              lyrics: sampleLyrics,
+              currentPosition: Duration(seconds: 25),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.bySemanticsLabel('Sudah dinyanyikan: Baris pertama'),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Sedang dinyanyikan: Baris kedua'),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Belum dinyanyikan: Baris ketiga'),
+        findsOneWidget,
+      );
+
+      // Test tapping a line calls onSeek
+      Duration? seeked;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LyricsView(
+              lyrics: sampleLyrics,
+              currentPosition: Duration.zero,
+              onSeek: (pos) => seeked = pos,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Baris kedua'));
+      expect(seeked, const Duration(seconds: 20));
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   test('honeybee has configured audio asset and resolves properly', () async {
     final honeybee = mockSongs.firstWhere((s) => s.id == 'honeybee');

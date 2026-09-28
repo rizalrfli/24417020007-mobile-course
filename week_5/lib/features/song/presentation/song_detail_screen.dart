@@ -6,6 +6,7 @@ import '../../../app/providers.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../shared/models/music.dart';
 import '../../../shared/widgets/app_widgets.dart';
+import 'song_audio_controller.dart';
 import 'song_audio_player.dart';
 
 class SongDetailScreen extends ConsumerStatefulWidget {
@@ -35,46 +36,55 @@ class _SongDetailScreenState extends ConsumerState<SongDetailScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Detail lagu')),
-    body: PageBody(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
-        child: AsyncContent(
-          value: ref.watch(songDetailProvider(widget.songId)),
-          onRetry: () => ref.invalidate(songDetailProvider(widget.songId)),
-          data: (song) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SongHeader(song: song),
-              SongAudioPlayer(song: song),
-              const Divider(),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Lirik',
-                      style: Theme.of(context).textTheme.titleLarge,
+  Widget build(BuildContext context) {
+    final player = ref.watch(songPlayerProvider);
+    final isCurrentSong = player.songId == widget.songId;
+    final currentPosition = isCurrentSong ? player.position : Duration.zero;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Detail lagu')),
+      body: PageBody(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+          child: AsyncContent(
+            value: ref.watch(songDetailProvider(widget.songId)),
+            onRetry: () => ref.invalidate(songDetailProvider(widget.songId)),
+            data: (song) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SongHeader(song: song),
+                SongAudioPlayer(song: song),
+                const Divider(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Lirik',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                     ),
-                  ),
-                  TextButton.icon(
-                    onPressed: () => context.go('/profile'),
-                    icon: const Icon(Icons.text_fields, size: 20),
-                    label: const Text('Ukuran teks'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              AsyncContent(
-                value: ref.watch(lyricsProvider(widget.songId)),
-                loadingLabel: 'Memuat lirik',
-                onRetry: () => ref.invalidate(lyricsProvider(widget.songId)),
-                data: (lyrics) => LyricsView(
-                  lyrics: lyrics,
-                  fontSize: ref.watch(lyricsSizeProvider).valueOrNull ?? 24,
+                    TextButton.icon(
+                      onPressed: () => context.go('/profile'),
+                      icon: const Icon(Icons.text_fields, size: 20),
+                      label: const Text('Ukuran teks'),
+                    ),
+                  ],
                 ),
-              ),
-              const Divider(),
+                const SizedBox(height: 16),
+                AsyncContent(
+                  value: ref.watch(lyricsProvider(widget.songId)),
+                  loadingLabel: 'Memuat lirik',
+                  onRetry: () => ref.invalidate(lyricsProvider(widget.songId)),
+                  data: (lyrics) => LyricsView(
+                    lyrics: lyrics,
+                    currentPosition: currentPosition,
+                    fontSize: ref.watch(lyricsSizeProvider).valueOrNull ?? 24,
+                    onSeek: isCurrentSong
+                        ? (pos) => ref.read(songPlayerProvider).seek(pos)
+                        : null,
+                  ),
+                ),
+                const Divider(),
               Text(
                 'Tentang lagu',
                 style: Theme.of(context).textTheme.titleLarge,
@@ -98,6 +108,7 @@ class _SongDetailScreenState extends ConsumerState<SongDetailScreen> {
       ),
     ),
   );
+}
 }
 
 class _SongHeader extends StatelessWidget {
@@ -182,14 +193,23 @@ class _SongHeader extends StatelessWidget {
 }
 
 class LyricsView extends StatelessWidget {
-  const LyricsView({super.key, required this.lyrics, this.fontSize = 24});
+  const LyricsView({
+    super.key,
+    required this.lyrics,
+    this.currentPosition = Duration.zero,
+    this.fontSize = 24,
+    this.onSeek,
+  });
+
   final Lyrics lyrics;
+  final Duration currentPosition;
   final double fontSize;
+  final ValueChanged<Duration>? onSeek;
 
   @override
   Widget build(BuildContext context) {
-    final text = lyrics.text?.trim();
-    if (text == null || text.isEmpty) {
+    final lines = lyrics.lines;
+    if (lines.isEmpty) {
       return const EmptyState(
         title: 'Lirik belum tersedia',
         message: 'Lyrics are currently unavailable.',
@@ -199,15 +219,22 @@ class LyricsView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SelectableText(
-          text,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.w600,
-            height: 1.5,
-            color: AppColors.textPrimary,
-          ),
-        ),
+        for (int i = 0; i < lines.length; i++) ...[
+          if (lines[i].text.isEmpty)
+            const SizedBox(height: 16)
+          else ...[
+            _LyricLineItem(
+              line: lines[i],
+              fontSize: fontSize,
+              isSung: currentPosition >= lines[i].startTime,
+              isCurrent: currentPosition >= lines[i].startTime &&
+                  (i == lines.length - 1 ||
+                      _isNextLineAfter(lines, i + 1, currentPosition)),
+              onTap: onSeek != null ? () => onSeek!(lines[i].startTime) : null,
+            ),
+            const SizedBox(height: 6),
+          ],
+        ],
         if (lyrics.attribution?.isNotEmpty ?? false)
           Padding(
             padding: const EdgeInsets.only(top: 24),
@@ -217,6 +244,72 @@ class LyricsView extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+
+  static bool _isNextLineAfter(
+    List<LyricLine> lines,
+    int nextIndex,
+    Duration currentPosition,
+  ) {
+    for (int j = nextIndex; j < lines.length; j++) {
+      if (lines[j].text.isNotEmpty) {
+        return currentPosition < lines[j].startTime;
+      }
+    }
+    return false;
+  }
+}
+
+class _LyricLineItem extends StatelessWidget {
+  const _LyricLineItem({
+    required this.line,
+    required this.fontSize,
+    required this.isSung,
+    required this.isCurrent,
+    this.onTap,
+  });
+
+  final LyricLine line;
+  final double fontSize;
+  final bool isSung;
+  final bool isCurrent;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSung ? AppColors.textPrimary : AppColors.muted;
+    final fontWeight = isCurrent
+        ? FontWeight.w700
+        : isSung
+        ? FontWeight.w600
+        : FontWeight.w500;
+
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
+      label: isCurrent
+          ? 'Sedang dinyanyikan: ${line.text}'
+          : isSung
+          ? 'Sudah dinyanyikan: ${line.text}'
+          : 'Belum dinyanyikan: ${line.text}',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+          child: AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 300),
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              height: 1.5,
+              color: color,
+            ),
+            child: Text(line.text),
+          ),
+        ),
+      ),
     );
   }
 }

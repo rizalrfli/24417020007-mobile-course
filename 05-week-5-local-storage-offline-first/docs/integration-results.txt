@@ -1,0 +1,268 @@
+Running Gradle task 'assembleDebug'...                             17.0s
+âˆš Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...        1,062ms
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/e.offline_notes( 4569): Compiler allocated 4515KB to compile void android.view.ViewRootImpl.performTraversals(long)
+I/flutter ( 4569): 00:00 +0: CRUD, themes, SQLite cache, airplane and HTTP sync evidence
+D/ProfileInstaller( 4569): Installing profile for com.example.offline_notes
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/InsetsController( 4569): hide(ime())
+I/ImeTracker( 4569): com.example.offline_notes:e3204515: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+I/flutter ( 4569): Evidence cache: /data/user/0/com.example.offline_notes/code_cache, command: online
+Evidence request: online
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+I/flutter ( 4569): Evidence cache: /data/user/0/com.example.offline_notes/code_cache, command: offline
+Evidence request: offline
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+I/ImeTracker( 4569): com.example.offline_notes:e56fca1f: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+I/HWUI    ( 4569): Using FreeType backend (prop=Auto)
+D/InsetsController( 4569): show(ime())
+D/InsetsController( 4569): Setting requestedVisibleTypes to 511 (was 503)
+I/e.offline_notes( 4569): NativeAlloc concurrent mark compact GC freed 2375KB AllocSpace bytes, 5(224KB) LOS objects, 49% free, 2971KB/5942KB, paused 1.318ms,8.899ms total 36.425ms
+I/ImeTracker( 4569): com.example.offline_notes:31aa516f: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:31aa516f: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor( 4569): The input method toggled cursor monitoring on
+I/AssistStructure( 4569): Flattened final assist data: 432 bytes, containing 1 windows, 3 views
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@19dcbff
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.view.ImeBackAnimationController@19dcbff
+I/ImeTracker( 4569): com.example.offline_notes:815a3070: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:815a3070: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+I/ImeTracker( 4569): com.example.offline_notes:7b49199c: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:7b49199c: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+I/ImeTracker( 4569): com.example.offline_notes:d619d417: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:d619d417: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+I/ImeTracker( 4569): com.example.offline_notes:60ee19ef: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): hide(ime())
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/InsetsController( 4569): Setting requestedVisibleTypes to 503 (was 511)
+I/ImeTracker( 4569): com.example.offline_notes:e56fca1f: onCancelled at PHASE_CLIENT_ANIMATION_CANCEL
+D/CompatChangeReporter( 4569): Compat change id reported: 395521150; UID 10231; state: ENABLED
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+I/flutter ( 4569): Evidence cache: /data/user/0/com.example.offline_notes/code_cache, command: capture:01-daftar-mode-pesawat
+I/AssistStructure( 4569): Flattened final assist data: 280 bytes, containing 1 windows, 2 views
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+W/RemoteInputConnectionImpl( 4569): requestCursorUpdates on inactive InputConnection
+W/RemoteInputConnectionImpl( 4569): getSurroundingText on inactive InputConnection
+I/ImeTracker( 4569): system_server:4316933f: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+W/InteractionJankMonitor( 4569): Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.example.offline_notes
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+Evidence request: capture:01-daftar-mode-pesawat
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+I/ImeTracker( 4569): com.example.offline_notes:0ffcd86b: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+D/InsetsController( 4569): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker( 4569): com.example.offline_notes:ef842302: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:ef842302: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor( 4569): The input method toggled cursor monitoring on
+I/AssistStructure( 4569): Flattened final assist data: 456 bytes, containing 1 windows, 3 views
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@19dcbff
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.view.ImeBackAnimationController@19dcbff
+D/VRI[MainActivity]( 4569): WindowInsets changed: ime:[0,0,0,883]
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/ImeTracker( 4569): com.example.offline_notes:0ffcd86b: onShown
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/ImeTracker( 4569): com.example.offline_notes:6a654935: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:6a654935: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker( 4569): com.example.offline_notes:d1652f76: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:d1652f76: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/AssistStructure( 4569): Flattened final assist data: 476 bytes, containing 1 windows, 3 views
+D/InputConnectionAdaptor( 4569): The input method toggled cursor monitoring on
+I/ImeTracker( 4569): com.example.offline_notes:90685a4d: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): hide(ime())
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/InsetsController( 4569): Setting requestedVisibleTypes to 503 (was 511)
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/VRI[MainActivity]( 4569): WindowInsets changed: ime:null
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/ImeTracker( 4569): system_server:50a9448a: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+I/flutter ( 4569): Evidence cache: /data/user/0/com.example.offline_notes/code_cache, command: capture:02-dirty-sebelum-sync
+Evidence request: capture:02-dirty-sebelum-sync
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+I/flutter ( 4569): Evidence cache: /data/user/0/com.example.offline_notes/code_cache, command: capture:03-bacaan-cache-offline
+Evidence request: capture:03-bacaan-cache-offline
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/flutter ( 4569): Evidence cache: /data/user/0/com.example.offline_notes/code_cache, command: capture:04-tema-gelap
+Evidence request: capture:04-tema-gelap
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/flutter ( 4569): Evidence cache: /data/user/0/com.example.offline_notes/code_cache, command: capture:05-tema-terang
+Evidence request: capture:05-tema-terang
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+I/flutter ( 4569): Evidence cache: /data/user/0/com.example.offline_notes/code_cache, command: online
+Evidence request: online
+I/flutter ( 4569): Evidence cache: /data/user/0/com.example.offline_notes/code_cache, command: capture:06-dirty-sesudah-sync
+Evidence request: capture:06-dirty-sesudah-sync
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+I/ImeTracker( 4569): com.example.offline_notes:cc900a55: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+D/InsetsController( 4569): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker( 4569): com.example.offline_notes:89e92f5c: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:89e92f5c: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor( 4569): The input method toggled cursor monitoring on
+I/AssistStructure( 4569): Flattened final assist data: 432 bytes, containing 1 windows, 3 views
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@19dcbff
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.view.ImeBackAnimationController@19dcbff
+D/VRI[MainActivity]( 4569): WindowInsets changed: ime:[0,0,0,883]
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/ImeTracker( 4569): com.example.offline_notes:cc900a55: onShown
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/ImeTracker( 4569): com.example.offline_notes:4c277d64: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): hide(ime())
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/InsetsController( 4569): Setting requestedVisibleTypes to 503 (was 511)
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/VRI[MainActivity]( 4569): WindowInsets changed: ime:null
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+I/ImeTracker( 4569): system_server:a5ec636b: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+I/ImeTracker( 4569): com.example.offline_notes:bf181d6b: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+D/InsetsController( 4569): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker( 4569): com.example.offline_notes:38e3ed2b: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:38e3ed2b: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor( 4569): The input method toggled cursor monitoring on
+I/AssistStructure( 4569): Flattened final assist data: 432 bytes, containing 1 windows, 3 views
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@19dcbff
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.view.ImeBackAnimationController@19dcbff
+D/VRI[MainActivity]( 4569): WindowInsets changed: ime:[0,0,0,883]
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/e.offline_notes( 4569): Background young concurrent mark compact GC freed 2683KB AllocSpace bytes, 4(256KB) LOS objects, 49% free, 2987KB/5942KB, paused 32.269ms,44.657ms total 150.032ms
+I/ImeTracker( 4569): com.example.offline_notes:bf181d6b: onShown
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/ImeTracker( 4569): com.example.offline_notes:be94d5ae: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): show(ime())
+I/ImeTracker( 4569): com.example.offline_notes:be94d5ae: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker( 4569): com.example.offline_notes:dc9c8025: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false userId 0 displayId 0
+D/InsetsController( 4569): hide(ime())
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/InsetsController( 4569): Setting requestedVisibleTypes to 503 (was 511)
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/VRI[MainActivity]( 4569): WindowInsets changed: ime:null
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+I/ImeTracker( 4569): system_server:189d677f: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/FlutterJNI( 4569): Sending viewport metrics to the engine.
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: io.flutter.embedding.android.FlutterActivity$1@82e09a4
+D/WindowOnBackDispatcher( 4569): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+D/WindowOnBackDispatcher( 4569): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@52b6e20
+I/flutter ( 4569): 01:05 +1: (tearDownAll)
+I/flutter ( 4569): 01:05 +2: All tests passed!
+All tests passed.

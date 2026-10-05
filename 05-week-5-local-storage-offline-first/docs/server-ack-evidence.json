@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "title": "Praktikum saat mode pesawat",
+    "body": "Isi diperbarui saat mode pesawat, dirty tetap aktif.",
+    "updated_at": "2026-10-05T06:38:47.299077Z",
+    "dirty": 0,
+    "deleted": 0
+  },
+  {
+    "id": 2,
+    "title": "Catatan untuk dihapus",
+    "body": "",
+    "updated_at": "2026-10-05T06:39:20.691278Z",
+    "dirty": 0,
+    "deleted": 1
+  }
+]

@@ -1,0 +1,21 @@
+00:00 +0: loading C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/cache_provider_test.dart
+00:00 +0: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/note_test.dart: model round-trip preserves dirty, tombstone, and UTC instant
+00:00 +1: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/cache_provider_test.dart: cache appears before network and remains after refresh failure
+00:00 +2: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/cache_provider_test.dart: cache appears before network and remains after refresh failure
+00:00 +3: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/cache_provider_test.dart: cache appears before network and remains after refresh failure
+00:00 +4: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/cache_provider_test.dart: forced offline reads cache without network
+00:00 +5: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/preferences_test.dart: theme persists and last-opened returns previous session before saving current
+00:00 +6: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/provider_test.dart: provider reads fake repository and reloads after local write
+00:00 +7: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/provider_test.dart: provider surfaces repository error without automatic retry
+00:00 +8: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/sqlite_repository_test.dart: SQLite CRUD sorts updates and keeps deleted notes queued
+00:00 +9: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/sqlite_repository_test.dart: SQLite CRUD sorts updates and keeps deleted notes queued
+00:00 +10: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/sqlite_repository_test.dart: SQLite CRUD sorts updates and keeps deleted notes queued
+00:00 +11: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/sqlite_repository_test.dart: SQLite CRUD sorts updates and keeps deleted notes queued
+00:01 +12: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/sqlite_repository_test.dart: SQLite CRUD sorts updates and keeps deleted notes queued
+00:01 +13: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/sqlite_repository_test.dart: SQLite CRUD sorts updates and keeps deleted notes queued
+00:01 +14: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/sqlite_repository_test.dart: SQLite CRUD sorts updates and keeps deleted notes queued
+00:01 +15: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/sqlite_repository_test.dart: SQLite conditional ACK cannot clear a newer edit
+00:01 +16: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/sqlite_repository_test.dart: fixed-width UTC timestamps sort correctly across fractional seconds
+00:01 +17: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/widget_test.dart: form validates via keyboard and Escape closes dialog at phone width
+00:02 +18: C:/Users/rizal/Documents/24417020007-mobile-course/offline_notes/test/widget_test.dart: long dirty note fits narrow phone in both themes
+00:02 +19: All tests passed!

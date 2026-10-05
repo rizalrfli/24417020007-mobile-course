@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/local/note.dart';
+import '../data/sync.dart';
 import '../providers/note_providers.dart';
 import '../widgets/note_form_dialog.dart';
-import 'settings_page.dart';
-import '../data/sync.dart';
-import 'posts_page.dart';
+import '../widgets/note_tile.dart';
 
 class NotesPage extends ConsumerWidget {
   const NotesPage({super.key});
@@ -51,16 +51,12 @@ class NotesPage extends ConsumerWidget {
           IconButton(
             tooltip: 'Pengaturan',
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const SettingsPage())),
+            onPressed: () => context.push('/settings'),
           ),
           IconButton(
             tooltip: 'Posts (cache-first)',
             icon: const Icon(Icons.article_outlined),
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const PostsPage())),
+            onPressed: () => context.push('/posts'),
           ),
           IconButton(
             tooltip: 'Sinkronkan',
@@ -98,24 +94,16 @@ class NotesPage extends ConsumerWidget {
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final note = notes[index];
-              return ListTile(
-                leading: Icon(
-                  note.dirty ? Icons.cloud_off : Icons.cloud_done,
-                  color: note.dirty ? Colors.orange : Colors.green,
-                ),
-                title: Text(note.title),
-                subtitle: Text(
-                  note.body.isEmpty ? '(tanpa isi)' : note.body,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                onTap: () => _openForm(context, ref, note),
-                trailing: IconButton(
-                  tooltip: 'Hapus',
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () =>
-                      ref.read(noteActionsProvider).delete(note.id!),
-                ),
+              return NoteTile(
+                note: note,
+                onTap: () {
+                  if (note.id != null) {
+                    context.push('/note/${note.id}');
+                  } else {
+                    _openForm(context, ref, note);
+                  }
+                },
+                onDelete: () => ref.read(noteActionsProvider).delete(note.id!),
               );
             },
           );

@@ -16,6 +16,11 @@ final dirtyCountProvider = FutureProvider<int>(
   (ref) => ref.watch(noteRepositoryProvider).countDirty(),
 );
 
+/// Membaca satu catatan berdasarkan id — dipakai oleh NoteDetailPage via GoRouter.
+final noteByIdProvider = FutureProvider.family<Note?, int>(
+  (ref, id) => ref.watch(noteRepositoryProvider).getNoteById(id),
+);
+
 final noteActionsProvider = Provider<NoteActions>((ref) => NoteActions(ref));
 
 /// Kumpulan aksi yang mengubah data. Setiap mutasi diakhiri invalidate

@@ -68,6 +68,8 @@ void main() {
 
     test('notesProvider error', () async {
       final container = ProviderContainer(
+        // Riverpod 3: nonaktifkan retry otomatis agar error segera dilempar.
+        retry: (_, _) => null,
         overrides: [
           noteRepositoryProvider.overrideWithValue(
             FakeNoteRepository(throwError: true),

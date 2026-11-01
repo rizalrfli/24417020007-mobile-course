@@ -70,9 +70,33 @@ flutter run --dart-define=API_BASE_URL=https://8080-<nama>.instabox.tech
 
 ### Kalau memakai HTTP biasa (bukan HTTPS)
 
-Android 9+ memblokir koneksi tanpa enkripsi. Untuk backend lokal, tambahkan
-`android:usesCleartextTraffic="true"` pada `<application>` di
-`android/app/src/main/AndroidManifest.xml`. Jangan dipakai untuk build rilis.
+Android 9+ memblokir koneksi tanpa enkripsi. Untuk build **debug**, izin ini
+sudah aktif lewat `android/app/src/debug/AndroidManifest.xml`
+(`usesCleartextTraffic="true"`), jadi `http://10.0.2.2:8080` langsung jalan
+tanpa mengubah apa pun. Build **release** tetap menolak cleartext.
+
+Kalau tetap gagal, tekan **Tes koneksi ke server** di layar login: hasilnya
+menyebut URL yang dipakai dan penyebabnya.
+
+## Diagnosa saat login gagal
+
+Layar login menampilkan dua hal yang membuat masalah langsung terlihat:
+
+1. Baris `Server: <url>` di bawah tombol. Kalau isinya
+   `https://example-campus-api.test`, berarti `--dart-define=API_BASE_URL`
+   tidak terbaca dan aplikasi memakai alamat placeholder.
+2. Tombol **Tes koneksi ke server** yang menembak `GET /health` dan melaporkan
+   hasilnya: terjangkau beserta waktunya, atau penyebab kegagalan yang spesifik
+   (alamat salah, port tertutup, firewall, sertifikat, path 404).
+
+| Gejala di layar | Arti | Perbaikan |
+| --- | --- | --- |
+| `Server: https://example-campus-api.test` | Flag dart-define tidak dipakai | Jalankan ulang `flutter run --dart-define=API_BASE_URL=...` |
+| "Tidak bisa terhubung" + alamat `10.0.2.2` | Dijalankan di HP fisik | Ganti ke IP laptop di WiFi yang sama |
+| "Tidak bisa terhubung" + `localhost` | Emulator tidak mengenal localhost laptop | Ganti ke `10.0.2.2` |
+| "menjawab 404" | Alamat benar, path salah | Periksa `API_BASE_URL` (jangan ada `/auth/login` di belakangnya) |
+| "menolak kredensial (kode 401)" | Server terjangkau, akun salah | Cek email/password di tabel akun demo |
+| "tidak menjawab dalam batas waktu" | Diblokir firewall | Buka port atau matikan firewall sementara |
 
 ## Uji cepat dengan curl
 

@@ -14,7 +14,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _obscure = true;
+  bool _testing = false;
   String? _error;
+  String? _diagnostic;
 
   @override
   void dispose() {
@@ -24,7 +26,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _submit() async {
-    setState(() => _error = null);
+    setState(() {
+      _error = null;
+      _diagnostic = null;
+    });
     await ref
         .read(authStateProvider.notifier)
         .login(_email.text.trim(), _password.text);
@@ -32,11 +37,37 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return;
     final state = ref.read(authStateProvider);
     if (state.hasError) {
-      setState(() => _error = _friendly(state.error));
+      setState(() {
+        _error = _friendly(state.error);
+        _diagnostic = describeAuthFailure(state.error, apiBaseUrl);
+      });
       return;
     }
     // Guard route di router memindahkan pengguna; rute tertunda dari notifikasi
     // dibuka oleh listener di `main.dart` setelah status login berubah.
+  }
+
+  /// Menembak `GET /health` untuk memisahkan "server tidak terjangkau" dari
+  /// "kredensial salah". Tanpa ini, pengguna hanya melihat pesan umum dan
+  /// menebak-nebak apakah masalahnya jaringan, URL, atau kata sandi.
+  Future<void> _testConnection() async {
+    setState(() {
+      _testing = true;
+      _diagnostic = null;
+      _error = null;
+    });
+    final result = await pingApi(ref.read(authDioProvider));
+    if (!mounted) return;
+    setState(() {
+      _testing = false;
+      if (result.ok) {
+        _diagnostic = 'Server terjangkau (${result.detail}). '
+            'Kalau login masih gagal, periksa email dan kata sandi.';
+      } else {
+        _error = 'Server tidak terjangkau.';
+        _diagnostic = result.detail;
+      }
+    });
   }
 
   String _friendly(Object? error) {
@@ -49,6 +80,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final auth = ref.watch(authStateProvider);
     final theme = Theme.of(context);
     final error = _error ?? (auth.hasError ? _friendly(auth.error) : null);
+    final diagnostic =
+        _diagnostic ?? (auth.hasError ? describeAuthFailure(auth.error, apiBaseUrl) : null);
 
     return Scaffold(
       body: Center(
@@ -85,7 +118,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   onSubmitted: (_) => _submit(),
                   decoration: InputDecoration(
                     labelText: 'Kata sandi',
-                    helperText: 'Minimal 6 karakter',
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       tooltip: _obscure
@@ -118,6 +150,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ],
                   ),
                 ],
+                if (diagnostic != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: SelectableText(
+                      diagnostic,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: auth.isLoading ? null : _submit,
@@ -129,6 +175,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         )
                       : const Text('Masuk'),
                 ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: (_testing || auth.isLoading) ? null : _testConnection,
+                  icon: _testing
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.wifi_tethering, size: 18),
+                  label: const Text('Tes koneksi ke server'),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   useMockAuth
@@ -136,6 +194,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           'mengandung @ dan kata sandi 6 karakter akan diterima.'
                       : 'Masuk memakai akun kampus Anda.',
                   style: theme.textTheme.bodySmall,
+                ),
+                const SizedBox(height: 4),
+                // Ditampilkan supaya salah set --dart-define langsung terlihat,
+                // bukan jadi tebakan.
+                SelectableText(
+                  'Server: $apiBaseUrl',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
                 ),
               ],
             ),

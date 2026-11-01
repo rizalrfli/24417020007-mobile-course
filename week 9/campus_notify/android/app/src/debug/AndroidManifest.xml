@@ -4,4 +4,15 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Hanya untuk build debug: izinkan HTTP biasa (bukan HTTPS).
+
+         Backend lokal untuk belajar biasanya berjalan di
+         http://10.0.2.2:8080 atau http://192.168.x.x:8080, dan Android 9+
+         memblokir koneksi tanpa enkripsi. Tanpa ini, login gagal dengan pesan
+         koneksi padahal server hidup.
+
+         File ini hanya digabung ke build debug. Build release tetap menolak
+         cleartext, jadi jangan mengandalkan HTTP untuk produksi. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>

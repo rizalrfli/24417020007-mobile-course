@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../messaging/message_route.dart';
 import '../messaging/push_service.dart';
 import '../providers/auth_provider.dart';
+import '../providers/inbox_provider.dart';
 import '../providers/push_provider.dart';
 import '../routes.dart';
 
@@ -41,7 +43,15 @@ class _DebugPageState extends ConsumerState<DebugPage> {
       ),
       data: {'route': route, 'id': '3'},
     );
-    await showForegroundNotification(message);
+    final item = inboxItemFromMessage(message);
+    // Notifikasi uji masuk daftar seperti pesan sungguhan, sehingga badge dan
+    // halaman daftar bisa diverifikasi tanpa menunggu server.
+    await ref.read(inboxProvider.notifier).add(item);
+    await showForegroundNotification(
+      message,
+      payload: encodeNotificationPayload(id: item.id, route: item.route),
+      badgeCount: ref.read(unreadCountProvider),
+    );
     ref.read(pushStatusProvider.notifier).note(
           PushDebugSource.foreground,
           'Banner lokal dikirim untuk $route',

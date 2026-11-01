@@ -5,19 +5,44 @@ import '../data/api_client.dart';
 import '../data/auth_repository.dart';
 import '../data/device_registrar.dart';
 import '../data/token_store.dart';
+import 'inbox_provider.dart';
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => TokenStore());
 
-final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository());
-
-/// Endpoint backend untuk `POST /devices`.
+/// Base URL backend kampus.
 ///
-/// Tidak di-hardcode: ganti lewat
-/// `flutter run --dart-define=API_BASE_URL=https://api.kampus.ac.id`.
+/// Tidak di-hardcode supaya bisa diganti tanpa mengubah kode:
+/// `flutter run --dart-define=API_BASE_URL=https://api.kampus.ac.id`
 const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
   defaultValue: 'https://example-campus-api.test',
 );
+
+/// Jalur mundur untuk demo saat backend belum tersedia.
+///
+/// Default `false`: build normal selalu memanggil API sungguhan. Aktifkan
+/// hanya dengan `--dart-define=USE_MOCK_AUTH=true`.
+const useMockAuth = bool.fromEnvironment('USE_MOCK_AUTH');
+
+/// Dio khusus untuk login dan refresh.
+///
+/// Dipisah dari [apiClientProvider] karena login tidak boleh memakai token
+/// lama maupun interceptor refresh: kegagalan login harus muncul sebagai pesan
+/// "kata sandi salah", bukan sebagai percobaan refresh yang menimpa sesi.
+final authDioProvider = Provider<Dio>((ref) {
+  return Dio(
+    BaseOptions(
+      baseUrl: apiBaseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+    ),
+  );
+});
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  if (useMockAuth) return const MockAuthRepository();
+  return HttpAuthRepository(ref.watch(authDioProvider));
+});
 
 final apiClientProvider = Provider<Dio>((ref) {
   final dio = buildApiClient(
@@ -42,7 +67,7 @@ class AuthNotifier extends AsyncNotifier<bool> {
     return token != null;
   }
 
-  /// Melempar [Exception] bila login gagal; pemanggil menampilkan pesannya.
+  /// Melempar [AuthFailure] bila login gagal; pemanggil menampilkan pesannya.
   Future<void> login(String email, String password) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
@@ -58,6 +83,9 @@ class AuthNotifier extends AsyncNotifier<bool> {
 
   Future<void> logout() async {
     await ref.read(tokenStoreProvider).clear();
+    // Pengumuman milik sesi sebelumnya tidak boleh tetap terlihat oleh
+    // pengguna lain di perangkat yang sama.
+    await ref.read(inboxProvider.notifier).clearAll();
     ref.invalidateSelf();
   }
 }

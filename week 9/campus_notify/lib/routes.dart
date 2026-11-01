@@ -8,6 +8,7 @@ class Routes {
   static const home = '/';
   static const splash = '/splash';
   static const login = '/login';
+  static const inbox = '/notifikasi';
   static const announcementPattern = '/pengumuman/:id';
   static const announcementPrefix = '/pengumuman/';
 

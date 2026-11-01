@@ -1,11 +1,24 @@
+import 'dart:ui';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../data/inbox_item.dart';
+import '../data/inbox_store.dart';
 import 'message_route.dart';
 
 const campusTopic = 'pengumuman-kampus';
-const _channelId = 'pengumuman';
+
+/// Versi kanal dinaikkan saat setelan bunyi berubah.
+///
+/// Android menyimpan setelan kanal selamanya setelah dibuat: mengubah
+/// `importance` atau `sound` pada id yang sama tidak berpengaruh pada perangkat
+/// yang sudah memasang aplikasi. Id baru memaksa sistem membuat kanal ulang.
+const _channelId = 'pengumuman_v2';
+const _channelName = 'Pengumuman Kampus';
+const _channelDescription =
+    'Pemberitahuan jadwal dan pengumuman dari kampus.';
 
 final _local = FlutterLocalNotificationsPlugin();
 
@@ -16,9 +29,28 @@ final _local = FlutterLocalNotificationsPlugin();
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Isolate terpisah: tidak ada BuildContext, Riverpod, maupun router di sini.
-  // Sistem Android/iOS sudah menampilkan payload `notification`; tugas handler
-  // ini hanya mencatat, dan navigasi terjadi saat pengguna mengklik banner.
-  debugPrint('Pesan background: ${message.messageId}');
+  // Yang bisa dilakukan hanya menyimpan data, dan itulah yang dikerjakan:
+  // pesan dimasukkan ke kotak masuk supaya tetap terlihat di daftar saat
+  // aplikasi dibuka kembali.
+  try {
+    // Isolate background tidak mewarisi plugin registrant dari isolate utama;
+    // tanpa baris ini `shared_preferences` tidak bisa dipanggil.
+    DartPluginRegistrant.ensureInitialized();
+    final item = _itemFromMessage(message);
+    await InboxRepository(PrefsInboxStore()).add(item);
+  } catch (error) {
+    // Penyimpanan gagal tidak boleh membuat proses background crash.
+    debugPrint('Gagal menyimpan pesan background: ${error.runtimeType}');
+  }
+}
+
+InboxItem _itemFromMessage(RemoteMessage message) {
+  return InboxItem.fromMessage(
+    messageId: message.messageId,
+    title: message.notification?.title,
+    body: message.notification?.body,
+    data: message.data,
+  );
 }
 
 /// Daftarkan handler background. Dipanggil sekali di `main()` sebelum
@@ -47,10 +79,10 @@ Future<bool> requestNotificationPermission() async {
 
 /// Kanal notifikasi lokal + penanganan klik banner foreground.
 ///
-/// Mengembalikan route dari banner yang dipakai untuk membuka aplikasi (cold
+/// Mengembalikan rute dari banner yang dipakai untuk membuka aplikasi (cold
 /// start), misalnya saat aplikasi dimatikan lalu pengguna mengklik banner.
-Future<String?> initLocalNotifications({
-  required void Function(String route) onOpen,
+Future<({String? id, String route})?> initLocalNotifications({
+  required void Function(String route, String? id) onOpen,
 }) async {
   const android = AndroidInitializationSettings('@mipmap/ic_launcher');
   const ios = DarwinInitializationSettings(
@@ -64,15 +96,20 @@ Future<String?> initLocalNotifications({
     onDidReceiveNotificationResponse: (response) {
       final payload = response.payload;
       if (payload == null || payload.isEmpty) return;
-      onOpen(routeFromMessage({'route': payload}));
+      final opened = decodeNotificationPayload(payload);
+      onOpen(opened.route, opened.id);
     },
   );
 
   const channel = AndroidNotificationChannel(
     _channelId,
-    'Pengumuman Kampus',
-    description: 'Pemberitahuan jadwal dan pengumuman dari kampus.',
+    _channelName,
+    description: _channelDescription,
     importance: Importance.high,
+    // Bunyi notifikasi: kanal memakai suara bawaan sistem. Tanpa
+    // `playSound: true` kanal bisa dibuat senyap pada beberapa perangkat.
+    playSound: true,
+    enableVibration: true,
   );
   await _local
       .resolvePlatformSpecificImplementation<
@@ -86,7 +123,7 @@ Future<String?> initLocalNotifications({
   if (launch?.didNotificationLaunchApp == true &&
       payload != null &&
       payload.isNotEmpty) {
-    return routeFromMessage({'route': payload});
+    return decodeNotificationPayload(payload);
   }
   return null;
 }
@@ -94,30 +131,44 @@ Future<String?> initLocalNotifications({
 /// Menampilkan banner untuk pesan yang datang saat aplikasi foreground.
 ///
 /// Tanpa langkah ini Android tidak menampilkan apa pun ketika aplikasi terbuka.
-Future<void> showForegroundNotification(RemoteMessage message) async {
-  final title = message.notification?.title ?? message.data['title'] ?? 'Pengumuman';
+/// [badgeCount] dipakai untuk angka di tray notifikasi Android dan badge ikon
+/// aplikasi di iOS.
+Future<void> showForegroundNotification(
+  RemoteMessage message, {
+  required String payload,
+  int badgeCount = 0,
+}) async {
+  final title =
+      message.notification?.title ?? message.data['title'] ?? 'Pengumuman';
   final body = message.notification?.body ?? message.data['body'] ?? '';
-  final route = routeFromMessage(message.data);
 
-  const androidDetails = AndroidNotificationDetails(
+  final androidDetails = AndroidNotificationDetails(
     _channelId,
-    'Pengumuman Kampus',
+    _channelName,
+    channelDescription: _channelDescription,
     importance: Importance.high,
     priority: Priority.high,
+    // Bunyi: `playSound` + suara bawaan sistem. `sound` sengaja tidak diisi
+    // agar tidak bergantung pada file audio di `res/raw`.
+    playSound: true,
+    enableVibration: true,
+    number: badgeCount,
   );
-  const iosDetails = DarwinNotificationDetails(
+  final iosDetails = DarwinNotificationDetails(
     presentAlert: true,
     presentBanner: true,
     presentSound: true,
+    badgeNumber: badgeCount,
   );
 
   await _local.show(
     // Id stabil per pengumuman supaya kiriman ulang tidak menumpuk.
-    message.messageId?.hashCode ?? DateTime.now().millisecondsSinceEpoch.remainder(1 << 31),
+    message.messageId?.hashCode ??
+        DateTime.now().millisecondsSinceEpoch.remainder(1 << 31),
     title,
     body,
-    const NotificationDetails(android: androidDetails, iOS: iosDetails),
-    payload: route,
+    NotificationDetails(android: androidDetails, iOS: iosDetails),
+    payload: payload,
   );
 }
 
@@ -138,7 +189,9 @@ Future<void> initFcmToken({
       onTokenSeen(token, fromRefresh: false);
       await _send(token, onToken, onTokenError);
     } else {
-      onTokenError('Token kosong. Perangkat mungkin tanpa Google Play Services.');
+      onTokenError(
+        'Token kosong. Perangkat mungkin tanpa Google Play Services.',
+      );
     }
   } catch (error) {
     onTokenError('Gagal mengambil token: ${error.runtimeType}');
@@ -170,9 +223,11 @@ Future<void> _send(
 }
 
 /// Pesan saat aplikasi di background lalu bannernya diklik.
-void listenMessageOpened(void Function(String route) onOpen) {
+void listenMessageOpened(
+  void Function(Map<String, dynamic> data, String? messageId) onOpen,
+) {
   FirebaseMessaging.onMessageOpenedApp.listen((message) {
-    onOpen(routeFromMessage(message.data));
+    onOpen(message.data, message.messageId);
   });
 }
 
@@ -187,11 +242,15 @@ void listenForeground({
 }
 
 /// Pesan yang membuka aplikasi dari keadaan terminated.
-Future<String?> initialRouteFromNotification() async {
+Future<InboxItem?> initialItemFromNotification() async {
   final initial = await FirebaseMessaging.instance.getInitialMessage();
   if (initial == null) return null;
-  return routeFromMessage(initial.data);
+  return _itemFromMessage(initial);
 }
+
+/// Membangun [InboxItem] dari pesan yang diterima di isolate utama.
+InboxItem inboxItemFromMessage(RemoteMessage message) =>
+    _itemFromMessage(message);
 
 Future<void> subscribeCampusTopic() =>
     FirebaseMessaging.instance.subscribeToTopic(campusTopic);

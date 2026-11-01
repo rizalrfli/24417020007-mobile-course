@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'data/inbox_item.dart';
+import 'messaging/message_route.dart';
 import 'messaging/push_service.dart';
 import 'pages/announcement_page.dart';
 import 'pages/debug_page.dart';
 import 'pages/home_page.dart';
+import 'pages/inbox_page.dart';
 import 'pages/login_page.dart';
 import 'providers/auth_provider.dart';
+import 'providers/inbox_provider.dart';
 import 'providers/push_provider.dart';
 import 'routes.dart';
 
@@ -29,6 +33,15 @@ Future<void> main() async {
   final router = buildRouter(container);
   final push = container.read(pushStatusProvider.notifier);
 
+  // Angka badge di ikon aplikasi mengikuti jumlah notifikasi belum dibaca.
+  // Didaftarkan sebelum pesan pertama bisa masuk supaya badge tidak pernah
+  // tertinggal satu langkah.
+  container.listen<int>(
+    unreadCountProvider,
+    (_, next) => container.read(badgeSinkProvider).setCount(next),
+    fireImmediately: true,
+  );
+
   if (firebaseReady) {
     registerBackgroundHandler();
 
@@ -36,18 +49,46 @@ Future<void> main() async {
     push.permission(granted);
 
     final launchRoute = await initLocalNotifications(
-      onOpen: (route) => _open(container, router, route, 'foreground'),
+      onOpen: (route, id) => _openFromNotification(
+        container,
+        router,
+        route,
+        'foreground',
+        id: id,
+      ),
     );
 
     // Background lalu banner diklik.
     listenMessageOpened(
-      (route) => _open(container, router, route, 'background'),
+      (data, messageId) => _openFromNotification(
+        container,
+        router,
+        routeFromMessage(data),
+        'background',
+        id: InboxItem.fromMessage(
+          messageId: messageId,
+          title: data['title']?.toString(),
+          body: data['body']?.toString(),
+          data: data,
+        ).id,
+      ),
     );
 
     // Foreground: sistem tidak menampilkan banner otomatis.
     listenForeground(
       onMessage: (message) async {
-        await showForegroundNotification(message);
+        final item = inboxItemFromMessage(message);
+        // Masuk daftar lebih dulu supaya badge ikut naik bersamaan dengan
+        // banner muncul, bukan beberapa detik kemudian.
+        await container.read(inboxProvider.notifier).add(item);
+        await showForegroundNotification(
+          message,
+          payload: encodeNotificationPayload(
+            id: item.id,
+            route: item.route,
+          ),
+          badgeCount: container.read(unreadCountProvider),
+        );
         push.note(
           PushDebugSource.foreground,
           'Pesan diterima saat aplikasi terbuka',
@@ -67,13 +108,19 @@ Future<void> main() async {
     );
 
     // Terminated lalu banner diklik: rute disimpan sampai pengguna terautentikasi.
-    final initialRoute = await initialRouteFromNotification();
-    if (initialRoute != null) {
-      container.read(pendingRouteProvider.notifier).hold(initialRoute);
-      push.opened(initialRoute, 'terminated');
+    final initialItem = await initialItemFromNotification();
+    if (initialItem != null) {
+      container.read(pendingRouteProvider.notifier).hold(initialItem.route);
+      push.opened(initialItem.route, 'terminated');
+      // Dibuka langsung berarti sudah dibaca.
+      await container.read(inboxProvider.notifier).markRead(initialItem.id);
     } else if (launchRoute != null) {
-      container.read(pendingRouteProvider.notifier).hold(launchRoute);
-      push.opened(launchRoute, 'foreground');
+      container.read(pendingRouteProvider.notifier).hold(launchRoute.route);
+      push.opened(launchRoute.route, 'foreground');
+      final id = launchRoute.id;
+      if (id != null) {
+        await container.read(inboxProvider.notifier).markRead(id);
+      }
     }
   }
 
@@ -104,13 +151,20 @@ Future<void> main() async {
 
 /// Membuka [route] bila router sudah siap. Saat pengguna belum login, rute
 /// ditahan dan dibuka lagi setelah login berhasil.
-void _open(
+///
+/// [id] adalah notifikasi yang dibuka. Membukanya sama dengan membacanya,
+/// sehingga butir itu dihapus dari daftar dan badge berkurang.
+void _openFromNotification(
   ProviderContainer container,
   GoRouter router,
   String route,
-  String source,
-) {
+  String source, {
+  String? id,
+}) {
   container.read(pushStatusProvider.notifier).opened(route, source);
+  if (id != null) {
+    container.read(inboxProvider.notifier).markRead(id);
+  }
   if (container.read(authStateProvider).value == true) {
     router.go(route);
   } else {
@@ -128,7 +182,9 @@ GoRouter buildRouter(ProviderContainer container) {
 
       // Selama token masih dibaca, tampilkan layar tunggu supaya pengguna yang
       // sudah login tidak sempat melihat form login.
-      if (auth.isLoading) return location == Routes.splash ? null : Routes.splash;
+      if (auth.isLoading) {
+        return location == Routes.splash ? null : Routes.splash;
+      }
 
       final loggedIn = auth.value ?? false;
       if (!loggedIn) {
@@ -143,6 +199,7 @@ GoRouter buildRouter(ProviderContainer container) {
       GoRoute(path: Routes.splash, builder: (_, _) => const _SplashPage()),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginPage()),
       GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
+      GoRoute(path: Routes.inbox, builder: (_, _) => const InboxPage()),
       GoRoute(path: debugRoute, builder: (_, _) => const DebugPage()),
       GoRoute(
         path: Routes.announcementPattern,

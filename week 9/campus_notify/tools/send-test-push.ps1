@@ -27,7 +27,15 @@ if (-not $env:FCM_ACCESS_TOKEN) {
 $message = @{
   notification = @{ title = $Title; body = $Body }
   data         = @{ route = $Route; id = $Id }
-  android      = @{ priority = "high" }
+  android      = @{
+    priority = "high"
+    notification = @{
+      # Kanal yang dibuat aplikasi (`pengumuman_v2`). Tanpa channel_id, FCM
+      # memakai kanal cadangan bawaan yang tidak memakai suara kustom.
+      channel_id = "pengumuman_v2"
+      sound      = "default"
+    }
+  }
 }
 
 if ($Token) {

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../providers/push_provider.dart';
 import '../routes.dart';
+import 'inbox_page.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -18,6 +19,7 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Campus Notify'),
         actions: [
+          const NotificationBell(),
           IconButton(
             tooltip: 'Debug push',
             icon: const Icon(Icons.bug_report_outlined),

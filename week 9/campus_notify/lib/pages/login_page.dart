@@ -131,8 +131,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Autentikasi masih mock: email apa pun yang mengandung @ dan '
-                  'kata sandi 6 karakter akan diterima.',
+                  useMockAuth
+                      ? 'Mode demo: autentikasi tiruan aktif. Email apa pun yang '
+                          'mengandung @ dan kata sandi 6 karakter akan diterima.'
+                      : 'Masuk memakai akun kampus Anda.',
                   style: theme.textTheme.bodySmall,
                 ),
               ],

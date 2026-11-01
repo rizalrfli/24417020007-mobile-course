@@ -29,6 +29,19 @@ app state (foreground, background, terminated).
   Ada tombol banner uji, kirim ulang token, dan subscribe/unsubscribe topik.
 - Rute tertunda: bila notifikasi diklik saat pengguna belum login, tujuan
   disimpan lalu dibuka setelah login berhasil.
+- **Login lewat API**: `POST /auth/login` mengirim `email` + `password` dan
+  menerima `access_token` + `refresh_token`. Token disimpan di secure storage,
+  dan setiap 401 memicu satu kali refresh otomatis.
+- **Kotak masuk notifikasi**: setiap notifikasi yang masuk (foreground,
+  background, maupun terminated) disimpan ke daftar lokal yang bertahan setelah
+  aplikasi ditutup. Membuka satu butir berarti membacanya: butir dihapus dari
+  daftar dan angka badge ikut berkurang.
+- **Badge angka**: ikon lonceng di AppBar menampilkan jumlah belum dibaca
+  (disembunyikan saat nol, diringkas `99+`), dan angka yang sama dikirim ke
+  badge ikon aplikasi lewat `app_badge_plus` bila launcher mendukung.
+- **Suara notifikasi**: kanal `pengumuman_v2` dibuat dengan `playSound: true`
+  dan `enableVibration: true`, sehingga notifikasi berbunyi tanpa perlu file
+  audio tambahan.
 
 ## Stack
 
@@ -46,33 +59,43 @@ lib/
 ├── main.dart                     # bootstrap FCM, router, guard, rute tertunda
 ├── routes.dart                   # konstanta rute + validasi id pengumuman
 ├── data/
-│   ├── auth_repository.dart      # mock login + refresh (titik ganti Firebase Auth)
+│   ├── auth_repository.dart      # HttpAuthRepository (API) + MockAuthRepository
 │   ├── token_store.dart          # satu-satunya pintu token
 │   ├── api_client.dart           # Dio + refresh sekali saat 401
 │   ├── api_errors.dart           # DioException -> pesan siap tampil
-│   └── device_registrar.dart     # POST /devices
+│   ├── device_registrar.dart     # POST /devices
+│   ├── inbox_item.dart           # model notifikasi + serialisasi
+│   └── inbox_store.dart          # simpan daftar (shared_preferences) + repository
 ├── providers/
 │   ├── auth_provider.dart        # sesi login + provider Dio
+│   ├── inbox_provider.dart       # daftar notifikasi + jumlah badge
 │   └── push_provider.dart        # status push untuk layar debug
 ├── messaging/
 │   ├── push_service.dart         # permission, token, tiga handler, topik
-│   └── message_route.dart        # RemoteMessage.data -> route (fungsi murni)
+│   ├── message_route.dart        # RemoteMessage.data -> route (fungsi murni)
+│   └── app_badge.dart            # badge ikon aplikasi (launcher)
 └── pages/
     ├── login_page.dart
     ├── home_page.dart
+    ├── inbox_page.dart           # daftar notifikasi + ikon lonceng berbadge
     ├── announcement_page.dart
     └── debug_page.dart
 test/
 ├── message_route_test.dart       # parsing route + pemetaan error
-├── session_test.dart             # TokenStore, refresh 401, retry
-└── auth_push_test.dart           # test dasar codelab
+├── session_test.dart             # TokenStore, login API, refresh 401, retry
+├── inbox_test.dart               # daftar notifikasi, batas, persistensi, badge
+└── auth_push_test.dart           # payload, badge, aksi "dibaca = hilang"
 docs/
 ├── ai-challenge.md               # prompt, output awal AI, perbaikan manual
 ├── refactoring.md                # tiga refactor wajib + alasan
 ├── fcm-test-matrix.md            # bukti uji tiga app state
-└── fcm-send.md                   # cara kirim pesan uji lewat HTTP v1
+├── fcm-send.md                   # cara kirim pesan uji lewat HTTP v1
+├── tugas-notifikasi.md           # login API, kotak masuk, badge, suara
+└── mock-api.md                   # backend tiruan untuk login lewat HTTP
 tools/
-└── send-test-push.ps1
+├── send-test-push.ps1
+└── mock-api/
+    └── server.js                 # mock API tanpa dependency
 screenshots/
 ```
 
@@ -81,13 +104,37 @@ screenshots/
 ```bash
 flutter pub get
 
-# Backend /devices. Tanpa --dart-define, aplikasi memakai alamat contoh dan
-# registrasi token akan gagal (kegagalan itu terlihat di layar Debug).
+# Login memakai API sungguhan. Alamat backend wajib diisi lewat --dart-define;
+# tanpa itu aplikasi memakai alamat contoh dan login akan gagal dengan pesan
+# "Gagal menghubungi server".
 flutter run --dart-define=API_BASE_URL=https://api.kampus.example
+
+# Demo tanpa backend (login tiruan, bukan jalur default):
+flutter run --dart-define=USE_MOCK_AUTH=true
+
+# Backend tiruan yang benar-benar lewat HTTP (lihat docs/mock-api.md):
+node tools/mock-api/server.js
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 
 flutter analyze
 flutter test
 ```
+
+`flutter test` menjalankan 55 unit/widget test. Uji integrasi ke mock API
+dipisah: `flutter test test/live_api_check.dart` (butuh server hidup).
+
+### Kontrak API yang dipakai
+
+| Endpoint | Body | Respons sukses |
+| --- | --- | --- |
+| `POST /auth/login` | `{"email": "...", "password": "..."}` | `{"access_token": "...", "refresh_token": "..."}` |
+| `POST /auth/refresh` | `{"refresh_token": "..."}` | `{"access_token": "..."}` |
+| `POST /devices` | `{"fcm_token": "...", "platform": "android"}` | 2xx |
+
+`accessToken` / `refreshToken` (camelCase) dan `token` juga diterima, supaya
+backend yang sedikit berbeda tidak memaksa kode Dart diubah. Bila backend tidak
+menerbitkan refresh token, isi `refresh_token` dengan string kosong: interceptor
+akan melewati proses refresh dan langsung meminta login ulang.
 
 FCM butuh `android/app/google-services.json` dengan package
 `com.example.campus_notify`. Plugin `com.google.gms.google-services` sudah aktif
@@ -102,7 +149,9 @@ di Xcode.
 | Pemeriksaan | Hasil |
 | --- | --- |
 | `flutter analyze` | 0 issue |
-| `flutter test` | 23 test lulus (3 file) |
+| `flutter test` | 55 test lulus (4 file) |
+| `flutter build apk --debug` | Berhasil (`app-debug.apk`, 152 MB) |
+| Uji integrasi mock API | 6 test lulus (`flutter test test/live_api_check.dart`) |
 | Uji tiga app state | Lihat `docs/fcm-test-matrix.md` |
 
 Detail pengujian, termasuk yang belum bisa dibuktikan, ada di

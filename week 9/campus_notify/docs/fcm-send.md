@@ -35,7 +35,13 @@ Payload yang dikirim:
       "body": "Kelas Mobile pindah ke Ruang A2 jam 13.00"
     },
     "data": { "route": "/pengumuman/3", "id": "3" },
-    "android": { "priority": "high" }
+    "android": {
+      "priority": "high",
+      "notification": {
+        "channel_id": "pengumuman_v2",
+        "sound": "default"
+      }
+    }
   }
 }
 ```
@@ -44,6 +50,11 @@ Payload yang dikirim:
 `data.route` dibaca aplikasi saat banner diklik. Kalau `route` diubah ke nilai
 yang tidak dikenal (mis. `/admin`), aplikasi kembali ke beranda, bukan membuka
 layar kosong.
+
+`android.notification.channel_id` **wajib** diisi `pengumuman_v2` agar banner
+dari background memakai kanal yang dibuat aplikasi (bunyi + getar aktif). Tanpa
+field itu FCM memakai kanal cadangan bawaannya sendiri, yang bisa senyap
+tergantung perangkat.
 
 ## Kalau token perangkat tidak tersedia
 

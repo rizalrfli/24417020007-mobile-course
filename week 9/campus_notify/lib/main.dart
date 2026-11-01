@@ -186,7 +186,10 @@ GoRouter buildRouter(ProviderContainer container) {
 
       // Selama token masih dibaca, tampilkan layar tunggu supaya pengguna yang
       // sudah login tidak sempat melihat form login.
-      if (auth.isLoading) {
+      // Hanya saat belum ada nilai sama sekali (start aplikasi). Saat tombol
+      // Masuk ditekan, status juga loading; tanpa `!auth.hasValue` layar login
+      // dibuang ke splash sehingga isian form dan pesan error ikut hilang.
+      if (auth.isLoading && !auth.hasValue) {
         return location == Routes.splash ? null : Routes.splash;
       }
 

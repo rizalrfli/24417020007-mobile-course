@@ -15,9 +15,13 @@ class AuthSession {
 
 /// Kegagalan login yang sudah siap ditampilkan ke pengguna.
 class AuthFailure implements Exception {
-  const AuthFailure(this.message);
+  const AuthFailure(this.message, {this.cause});
 
   final String message;
+
+  /// Error asli (mis. [DioException]) untuk diagnosis teknis di layar login.
+  /// Tanpa ini, detail seperti "connection refused" hilang saat dibungkus.
+  final Object? cause;
 
   /// Pesan polos tanpa awalan `Exception:` supaya bisa langsung ditampilkan.
   @override
@@ -32,7 +36,9 @@ abstract class AuthRepository {
     required String password,
   });
 
-  Future<String> refresh(String refreshToken);
+  /// Mengembalikan sesi baru. Bila server memutar refresh token (seperti mock
+  /// API), [AuthSession.refresh] berisi token baru; bila tidak, token lama.
+  Future<AuthSession> refresh(String refreshToken);
 }
 
 /// Login ke backend kampus lewat HTTP.
@@ -41,7 +47,8 @@ abstract class AuthRepository {
 /// - `POST {baseUrl}/auth/login` body `{"email": ..., "password": ...}`
 /// - respons sukses: `{"access_token": "...", "refresh_token": "..."}`
 /// - `POST {baseUrl}/auth/refresh` body `{"refresh_token": ...}`
-///   respons: `{"access_token": "..."}`
+///   respons: `{"access_token": "...", "refresh_token": "..."}` (refresh
+///   token baru opsional)
 ///
 /// Nama field juga diterima dalam bentuk camelCase (`accessToken`) maupun
 /// `token` tunggal, supaya backend yang sedikit berbeda tidak memaksa aplikasi
@@ -93,12 +100,12 @@ class HttpAuthRepository implements AuthRepository {
 
       return AuthSession(access: access, refresh: refresh);
     } on DioException catch (error) {
-      throw AuthFailure(_loginMessage(error));
+      throw AuthFailure(_loginMessage(error), cause: error);
     }
   }
 
   @override
-  Future<String> refresh(String refreshToken) async {
+  Future<AuthSession> refresh(String refreshToken) async {
     if (refreshToken.isEmpty) {
       throw const AuthFailure('Sesi berakhir. Silakan masuk kembali.');
     }
@@ -108,15 +115,23 @@ class HttpAuthRepository implements AuthRepository {
         data: {'refresh_token': refreshToken},
       );
       final body = response.data;
-      final access = body is Map
-          ? _firstString(body, const ['access_token', 'accessToken', 'token'])
-          : null;
+      if (body is! Map) {
+        throw const AuthFailure('Sesi berakhir. Silakan masuk kembali.');
+      }
+      final access =
+          _firstString(body, const ['access_token', 'accessToken', 'token']);
       if (access == null || access.isEmpty) {
         throw const AuthFailure('Sesi berakhir. Silakan masuk kembali.');
       }
-      return access;
+      // Server yang memutar refresh token langsung mencabut token lama, jadi
+      // token baru wajib disimpan. Kalau tidak dikirim, token lama masih sah.
+      final rotated = _firstString(body, const [
+        'refresh_token',
+        'refreshToken',
+      ]);
+      return AuthSession(access: access, refresh: rotated ?? refreshToken);
     } on DioException catch (error) {
-      throw AuthFailure(mapDioException(error).message);
+      throw AuthFailure(mapDioException(error).message, cause: error);
     }
   }
 
@@ -165,10 +180,13 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<String> refresh(String refreshToken) async {
+  Future<AuthSession> refresh(String refreshToken) async {
     if (refreshToken.isEmpty) {
       throw const AuthFailure('Refresh token hilang');
     }
-    return 'mock-access-renewed-${DateTime.now().millisecondsSinceEpoch}';
+    return AuthSession(
+      access: 'mock-access-renewed-${DateTime.now().millisecondsSinceEpoch}',
+      refresh: refreshToken,
+    );
   }
 }

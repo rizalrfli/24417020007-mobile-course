@@ -35,15 +35,17 @@ void main() {
   });
 
   setUp(() {
-    FlutterSecureStoragePlatform.instance =
-        TestFlutterSecureStoragePlatform({});
+    FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform(
+      {},
+    );
   });
 
   ProviderContainer buildContainer() {
     return ProviderContainer(
       overrides: [
-        serverConfigStoreProvider
-            .overrideWithValue(MemoryServerConfigStore(baseUrl)),
+        serverConfigStoreProvider.overrideWithValue(
+          MemoryServerConfigStore(baseUrl),
+        ),
         authRepositoryProvider.overrideWithValue(
           HttpAuthRepository(Dio(BaseOptions(baseUrl: baseUrl))),
         ),
@@ -108,7 +110,11 @@ void main() {
     final state = container.read(authStateProvider);
     // ignore: avoid_print
     print('STATE setelah login -> ${state.runtimeType} / ${state.value}');
-    expect(state.hasError, isFalse, reason: 'tidak boleh error: ${state.error}');
+    expect(
+      state.hasError,
+      isFalse,
+      reason: 'tidak boleh error: ${state.error}',
+    );
     expect(state.value, isTrue);
 
     final access = await container.read(tokenStoreProvider).readAccess();
@@ -155,8 +161,9 @@ void main() {
     expect(container.read(authStateProvider).value, isTrue);
   });
 
-  testWidgets('login salah menampilkan pesan dan tetap di /login',
-      (tester) async {
+  testWidgets('login salah menampilkan pesan dan tetap di /login', (
+    tester,
+  ) async {
     final container = buildContainer();
     addTearDown(container.dispose);
     await bootApp(tester, container);
@@ -170,28 +177,32 @@ void main() {
     // ignore: avoid_print
     print('SETELAH GAGAL -> ${visibleText()}');
 
-    expect(find.byKey(const Key('email')), findsOneWidget, reason: 'tetap di /login');
+    expect(
+      find.byKey(const Key('email')),
+      findsOneWidget,
+      reason: 'tetap di /login',
+    );
     expect(find.textContaining('salah'), findsWidgets);
   });
 
   testWidgets('alamat server bisa diganti dari layar login', (tester) async {
     final container = ProviderContainer(
       overrides: [
-        // Mulai dari alamat contoh: kondisi yang membuat pengguna tidak bisa
-        // login.
-        serverConfigStoreProvider.overrideWithValue(
-          MemoryServerConfigStore(),
-        ),
+        // Mulai dari alamat default (belum pernah disimpan).
+        // (kosong) sehingga panel server harus dibuka manual.
+        serverConfigStoreProvider.overrideWithValue(MemoryServerConfigStore()),
       ],
     );
     addTearDown(container.dispose);
 
     await container.read(serverUrlProvider.notifier).load();
-    expect(isPlaceholderUrl(container.read(serverUrlProvider)), isTrue);
+    expect(container.read(serverUrlProvider), apiBaseUrl);
 
     await bootApp(tester, container);
 
-    // Panel server otomatis terbuka saat alamat masih contoh.
+    // Panel server tertutup saat alamat bukan contoh: buka dulu.
+    await tester.tap(find.textContaining('Server: '));
+    await tester.pump();
     await tester.enterText(find.byKey(const Key('server')), baseUrl);
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));

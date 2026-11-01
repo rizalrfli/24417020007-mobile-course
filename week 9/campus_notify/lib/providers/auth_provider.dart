@@ -20,7 +20,10 @@ final tokenStoreProvider = Provider<TokenStore>((ref) => TokenStore());
 /// terminal, lupa rebuild) dan gejalanya sulit dibedakan dari "server mati".
 const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'https://example-campus-api.test',
+  // 10.0.2.2 = localhost laptop dilihat dari emulator Android, tempat mock API
+  // (`node tools/mock-api/server.js`) berjalan di port 8080. HP fisik: ganti
+  // dengan IP laptop dari layar login.
+  defaultValue: 'http://10.0.2.2:8080',
 );
 
 /// Jalur mundur untuk demo saat backend belum tersedia.
@@ -134,6 +137,9 @@ Future<PingResult> pingApi(Dio dio, String baseUrl) async {
 /// ramah. Pesan ramah saja tidak cukup saat yang salah adalah URL atau
 /// firewall: pengguna hanya bisa menebak.
 String describeAuthFailure(Object? error, String baseUrl) {
+  if (error is AuthFailure && error.cause is DioException) {
+    return _explainDio(error.cause! as DioException, baseUrl);
+  }
   if (error is AuthFailure) {
     return 'Server: $baseUrl';
   }

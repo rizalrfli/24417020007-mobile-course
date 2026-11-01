@@ -21,12 +21,12 @@ const baseUrl = String.fromEnvironment(
 );
 
 Dio buildDio({String url = baseUrl, int detik = 5}) => Dio(
-      BaseOptions(
-        baseUrl: url,
-        connectTimeout: Duration(seconds: detik),
-        receiveTimeout: Duration(seconds: detik),
-      ),
-    );
+  BaseOptions(
+    baseUrl: url,
+    connectTimeout: Duration(seconds: detik),
+    receiveTimeout: Duration(seconds: detik),
+  ),
+);
 
 Future<bool> serverHidup() async {
   try {
@@ -58,10 +58,9 @@ void main() {
   });
 
   test('login lewat HTTP ke mock API berhasil', () async {
-    final session = await HttpAuthRepository(buildDio()).login(
-      email: 'mhs@polinema.ac.id',
-      password: 'rahasia1',
-    );
+    final session = await HttpAuthRepository(
+      buildDio(),
+    ).login(email: 'mhs@polinema.ac.id', password: 'rahasia1');
 
     expect(session.access, isNotEmpty);
     expect(session.refresh, isNotEmpty);
@@ -69,8 +68,9 @@ void main() {
 
   test('password salah ditolak dengan pesan yang ramah', () async {
     await expectLater(
-      HttpAuthRepository(buildDio())
-          .login(email: 'mhs@polinema.ac.id', password: 'salah'),
+      HttpAuthRepository(
+        buildDio(),
+      ).login(email: 'mhs@polinema.ac.id', password: 'salah'),
       throwsA(
         isA<AuthFailure>().having(
           (failure) => failure.message,
@@ -90,15 +90,16 @@ void main() {
 
     final renewed = await auth.refresh(session.refresh);
 
-    expect(renewed, isNotEmpty);
-    expect(renewed, isNot(session.access));
+    expect(renewed.access, isNotEmpty);
+    expect(renewed.access, isNot(session.access));
+    // Mock API memutar refresh token, jadi token baru harus berbeda.
+    expect(renewed.refresh, isNot(session.refresh));
   });
 
   test('POST /devices memakai Bearer token dari login', () async {
-    final session = await HttpAuthRepository(buildDio()).login(
-      email: 'mhs@polinema.ac.id',
-      password: 'rahasia1',
-    );
+    final session = await HttpAuthRepository(
+      buildDio(),
+    ).login(email: 'mhs@polinema.ac.id', password: 'rahasia1');
 
     final api = buildDio();
     api.options.headers['Authorization'] = 'Bearer ${session.access}';
@@ -106,8 +107,9 @@ void main() {
     await HttpDeviceRegistrar(api).register('token-uji-dari-dart-123456');
 
     final daftar = await api.get<dynamic>('/devices');
-    final tokens = (daftar.data['devices'] as List)
-        .map((entry) => entry['fcm_token_prefix']);
+    final tokens = (daftar.data['devices'] as List).map(
+      (entry) => entry['fcm_token_prefix'],
+    );
     expect(tokens, contains('token-uji-da...'));
   });
 

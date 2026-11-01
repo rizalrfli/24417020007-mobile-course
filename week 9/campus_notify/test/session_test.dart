@@ -10,7 +10,9 @@ import 'package:campus_notify/data/token_store.dart';
 /// `TokenStore` asli di atas platform secure storage palsu di memori, sehingga
 /// logika refresh token diuji tanpa platform channel Android/iOS.
 TokenStore memoryStore(Map<String, String> data) {
-  FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform(data);
+  FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform(
+    data,
+  );
   return TokenStore(storage: const FlutterSecureStorage());
 }
 
@@ -18,7 +20,7 @@ class FailingAuthRepository extends MockAuthRepository {
   const FailingAuthRepository();
 
   @override
-  Future<String> refresh(String refreshToken) async {
+  Future<AuthSession> refresh(String refreshToken) async {
     throw const AuthFailure('refresh kedaluwarsa');
   }
 }
@@ -58,8 +60,10 @@ void main() {
     });
 
     test('login valid mengembalikan pasangan access dan refresh', () async {
-      final session = await const MockAuthRepository()
-          .login(email: 'mhs@polinema.ac.id', password: 'rahasia1');
+      final session = await const MockAuthRepository().login(
+        email: 'mhs@polinema.ac.id',
+        password: 'rahasia1',
+      );
       expect(session.access, isNotEmpty);
       expect(session.refresh, isNotEmpty);
     });
@@ -174,16 +178,19 @@ void main() {
       );
     });
 
-    test('refresh mengirim refresh token dan mengembalikan access baru',
-        () async {
-      reply(200, '{"access_token":"a9"}');
+    test(
+      'refresh mengirim refresh token dan mengembalikan access baru',
+      () async {
+        reply(200, '{"access_token":"a9"}');
 
-      final renewed = await auth.refresh('r1');
+        final renewed = await auth.refresh('r1');
 
-      expect(renewed, 'a9');
-      expect(requests.single.path, '/auth/refresh');
-      expect(requests.single.data, {'refresh_token': 'r1'});
-    });
+        expect(renewed.access, 'a9');
+        expect(renewed.refresh, 'r1', reason: 'server tidak memutar token');
+        expect(requests.single.path, '/auth/refresh');
+        expect(requests.single.data, {'refresh_token': 'r1'});
+      },
+    );
   });
 
   group('Interceptor refresh 401', () {
@@ -199,41 +206,46 @@ void main() {
       dio = buildApiClient(store, const MockAuthRepository());
     });
 
-    test('401 memicu refresh sekali lalu mengulang request dengan token baru',
-        () async {
-      await store.save(access: 'access-lama', refresh: 'refresh-valid');
-      dio.httpClientAdapter = _FakeAdapter((options) {
-        deviceCalls++;
-        final auth = options.headers['Authorization'];
-        return _response(
-          options,
-          auth == 'Bearer access-lama' ? 401 : 200,
-          '{}',
+    test(
+      '401 memicu refresh sekali lalu mengulang request dengan token baru',
+      () async {
+        await store.save(access: 'access-lama', refresh: 'refresh-valid');
+        dio.httpClientAdapter = _FakeAdapter((options) {
+          deviceCalls++;
+          final auth = options.headers['Authorization'];
+          return _response(
+            options,
+            auth == 'Bearer access-lama' ? 401 : 200,
+            '{}',
+          );
+        });
+
+        final response = await dio.post('/devices', data: {'fcm_token': 't'});
+
+        expect(response.statusCode, 200);
+        expect(deviceCalls, 2, reason: 'request awal + satu retry');
+        expect(await store.readAccess(), startsWith('mock-access-renewed-'));
+        expect(await store.readRefresh(), 'refresh-valid');
+      },
+    );
+
+    test(
+      'refresh gagal membersihkan sesi supaya pengguna login ulang',
+      () async {
+        await store.save(access: 'access-lama', refresh: 'refresh-valid');
+        final failing = buildApiClient(store, const FailingAuthRepository());
+        failing.httpClientAdapter = _FakeAdapter(
+          (options) => _response(options, 401, '{}'),
         );
-      });
 
-      final response = await dio.post('/devices', data: {'fcm_token': 't'});
-
-      expect(response.statusCode, 200);
-      expect(deviceCalls, 2, reason: 'request awal + satu retry');
-      expect(await store.readAccess(), startsWith('mock-access-renewed-'));
-      expect(await store.readRefresh(), 'refresh-valid');
-    });
-
-    test('refresh gagal membersihkan sesi supaya pengguna login ulang',
-        () async {
-      await store.save(access: 'access-lama', refresh: 'refresh-valid');
-      final failing = buildApiClient(store, const FailingAuthRepository());
-      failing.httpClientAdapter =
-          _FakeAdapter((options) => _response(options, 401, '{}'));
-
-      await expectLater(
-        failing.post('/devices', data: {'fcm_token': 't'}),
-        throwsA(isA<DioException>()),
-      );
-      expect(await store.readAccess(), isNull);
-      expect(await store.readRefresh(), isNull);
-    });
+        await expectLater(
+          failing.post('/devices', data: {'fcm_token': 't'}),
+          throwsA(isA<DioException>()),
+        );
+        expect(await store.readAccess(), isNull);
+        expect(await store.readRefresh(), isNull);
+      },
+    );
 
     test('tanpa refresh token request tidak diulang', () async {
       await store.save(access: 'access-lama', refresh: '');
@@ -271,8 +283,7 @@ class _FakeAdapter implements HttpClientAdapter {
     RequestOptions options,
     Stream<List<int>>? requestStream,
     Future<void>? cancelFuture,
-  ) async =>
-      onRequest(options);
+  ) async => onRequest(options);
 
   @override
   void close({bool force = false}) {}

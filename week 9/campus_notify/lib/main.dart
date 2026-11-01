@@ -30,6 +30,10 @@ Future<void> main() async {
   }
 
   final container = ProviderContainer();
+  // Alamat server yang pernah disimpan pengguna dipakai sebelum router dibuat,
+  // supaya login pertama sudah menuju alamat yang benar.
+  await container.read(serverUrlProvider.notifier).load();
+
   final router = buildRouter(container);
   final push = container.read(pushStatusProvider.notifier);
 

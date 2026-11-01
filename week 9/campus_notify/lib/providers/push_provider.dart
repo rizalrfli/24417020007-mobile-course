@@ -164,7 +164,9 @@ final pendingRouteProvider =
 final routerRefreshProvider = ChangeNotifierProvider<RouterRefresh>((ref) {
   final refresh = RouterRefresh();
   ref.listen(authStateProvider, (_, _) => refresh.notify());
-  ref.onDispose(refresh.dispose);
+  // `ChangeNotifierProvider` sudah membuang notifier ini sendiri saat provider
+  // di-dispose. Menambahkan `ref.onDispose(refresh.dispose)` membuatnya dibuang
+  // dua kali dan melempar "A RouterRefresh was used after being disposed."
   return refresh;
 });
 

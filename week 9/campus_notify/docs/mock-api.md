@@ -50,23 +50,29 @@ diputar) langsung ditolak walau tanda tangannya masih sah.
 
 ## Menghubungkan aplikasi
 
-**Emulator Android** — `10.0.2.2` adalah alias host dari dalam emulator:
+Cara termudah: **atur langsung dari layar login**. Ketuk panel `Server: ...` di
+atas kolom email, isi alamat, lalu tekan **Simpan**. Alamat tersimpan di
+perangkat, jadi cukup sekali dan tidak perlu menjalankan ulang dengan flag.
+
+Kalau alamat masih alamat contoh (`example-campus-api.test`), panel otomatis
+terbuka dan diberi peringatan merah, karena login tidak akan pernah berhasil.
+
+Alamat yang perlu diisi:
+
+| Situasi | Alamat |
+| --- | --- |
+| Emulator Android, backend di laptop | `http://10.0.2.2:8080` |
+| HP fisik, backend di laptop (WiFi sama) | `http://192.168.1.5:8080` (IP laptop) |
+| Backend di sandbox ini | `https://8080-<nama>.instabox.tech` |
+
+Cara lama (masih didukung) — mengisi lewat flag saat menjalankan aplikasi:
 
 ```bash
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 ```
 
-**HP fisik di WiFi yang sama** — pakai IP laptop, bukan `localhost`:
-
-```bash
-flutter run --dart-define=API_BASE_URL=http://192.168.1.5:8080
-```
-
-**Lewat URL publik sandbox** (bila backend dijalankan di mesin ini):
-
-```bash
-flutter run --dart-define=API_BASE_URL=https://8080-<nama>.instabox.tech
-```
+Nilai dari flag hanya menjadi **default awal**; alamat yang disimpan lewat layar
+login menang atasnya. Tombol **Reset** mengembalikan ke nilai flag.
 
 ### Kalau memakai HTTP biasa (bukan HTTPS)
 
@@ -82,19 +88,19 @@ menyebut URL yang dipakai dan penyebabnya.
 
 Layar login menampilkan dua hal yang membuat masalah langsung terlihat:
 
-1. Baris `Server: <url>` di bawah tombol. Kalau isinya
-   `https://example-campus-api.test`, berarti `--dart-define=API_BASE_URL`
-   tidak terbaca dan aplikasi memakai alamat placeholder.
+1. Panel `Server: <url>` di atas kolom email. Ketuk untuk membuka dan
+   **mengubah alamat tanpa rebuild**. Kalau isinya
+   `https://example-campus-api.test`, berarti alamat belum pernah diatur.
 2. Tombol **Tes koneksi ke server** yang menembak `GET /health` dan melaporkan
    hasilnya: terjangkau beserta waktunya, atau penyebab kegagalan yang spesifik
    (alamat salah, port tertutup, firewall, sertifikat, path 404).
 
 | Gejala di layar | Arti | Perbaikan |
 | --- | --- | --- |
-| `Server: https://example-campus-api.test` | Flag dart-define tidak dipakai | Jalankan ulang `flutter run --dart-define=API_BASE_URL=...` |
+| Peringatan merah "alamat contoh belum diganti" | Alamat belum diatur | Ketuk panel Server, isi alamat, Simpan |
 | "Tidak bisa terhubung" + alamat `10.0.2.2` | Dijalankan di HP fisik | Ganti ke IP laptop di WiFi yang sama |
 | "Tidak bisa terhubung" + `localhost` | Emulator tidak mengenal localhost laptop | Ganti ke `10.0.2.2` |
-| "menjawab 404" | Alamat benar, path salah | Periksa `API_BASE_URL` (jangan ada `/auth/login` di belakangnya) |
+| "menjawab 404" | Alamat benar, path salah | Isi alamat tanpa `/auth/login` di belakangnya |
 | "menolak kredensial (kode 401)" | Server terjangkau, akun salah | Cek email/password di tabel akun demo |
 | "tidak menjawab dalam batas waktu" | Diblokir firewall | Buka port atau matikan firewall sementara |
 

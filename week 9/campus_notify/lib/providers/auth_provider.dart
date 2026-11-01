@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/api_client.dart';
 import '../data/auth_repository.dart';
 import '../data/device_registrar.dart';
+import '../data/server_config.dart';
 import '../data/token_store.dart';
 import 'inbox_provider.dart';
 
@@ -13,6 +14,10 @@ final tokenStoreProvider = Provider<TokenStore>((ref) => TokenStore());
 ///
 /// Tidak di-hardcode supaya bisa diganti tanpa mengubah kode:
 /// `flutter run --dart-define=API_BASE_URL=https://api.kampus.ac.id`
+///
+/// Nilai ini hanya **default awal**. Pengguna bisa menggantinya langsung dari
+/// layar login, karena flag `--dart-define` sering tidak terbaca (salah
+/// terminal, lupa rebuild) dan gejalanya sulit dibedakan dari "server mati".
 const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
   defaultValue: 'https://example-campus-api.test',
@@ -24,6 +29,43 @@ const apiBaseUrl = String.fromEnvironment(
 /// hanya dengan `--dart-define=USE_MOCK_AUTH=true`.
 const useMockAuth = bool.fromEnvironment('USE_MOCK_AUTH');
 
+final serverConfigStoreProvider = Provider<ServerConfigStore>(
+  (ref) => PrefsServerConfigStore(),
+);
+
+/// Alamat backend yang sedang dipakai.
+///
+/// Disimpan di perangkat, jadi pengguna cukup mengaturnya sekali lewat layar
+/// login dan tidak perlu menjalankan ulang dengan flag tertentu.
+final serverUrlProvider =
+    NotifierProvider<ServerUrlNotifier, String>(ServerUrlNotifier.new);
+
+class ServerUrlNotifier extends Notifier<String> {
+  @override
+  String build() => apiBaseUrl;
+
+  /// Membaca alamat tersimpan. Dipanggil sekali saat aplikasi mulai.
+  Future<void> load() async {
+    final saved = await ref.read(serverConfigStoreProvider).read();
+    if (saved != null && saved.isNotEmpty) state = saved;
+  }
+
+  /// Menyimpan alamat baru. Mengembalikan false bila formatnya tidak sah.
+  Future<bool> save(String raw) async {
+    final normalized = normalizeServerUrl(raw);
+    if (normalized == null) return false;
+    state = normalized;
+    await ref.read(serverConfigStoreProvider).write(normalized);
+    return true;
+  }
+
+  /// Kembali ke alamat dari `--dart-define`.
+  Future<void> reset() async {
+    state = apiBaseUrl;
+    await ref.read(serverConfigStoreProvider).write('');
+  }
+}
+
 /// Dio khusus untuk login dan refresh.
 ///
 /// Dipisah dari [apiClientProvider] karena login tidak boleh memakai token
@@ -32,7 +74,7 @@ const useMockAuth = bool.fromEnvironment('USE_MOCK_AUTH');
 final authDioProvider = Provider<Dio>((ref) {
   return Dio(
     BaseOptions(
-      baseUrl: apiBaseUrl,
+      baseUrl: ref.watch(serverUrlProvider),
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
     ),
@@ -49,7 +91,7 @@ final apiClientProvider = Provider<Dio>((ref) {
     ref.watch(tokenStoreProvider),
     ref.watch(authRepositoryProvider),
   );
-  dio.options.baseUrl = apiBaseUrl;
+  dio.options.baseUrl = ref.watch(serverUrlProvider);
   return dio;
 });
 
@@ -68,23 +110,23 @@ typedef PingResult = ({bool ok, String detail});
 ///
 /// [dio] sebaiknya berasal dari [authDioProvider] yang juga dipakai login,
 /// sehingga hasil tes mencerminkan jalur yang benar-benar dipakai.
-Future<PingResult> pingApi(Dio dio) async {
+Future<PingResult> pingApi(Dio dio, String baseUrl) async {
   final started = DateTime.now();
   try {
     final response = await dio.get<dynamic>('/health');
     final ms = DateTime.now().difference(started).inMilliseconds;
     if (response.statusCode == 200) {
-      return (ok: true, detail: '$apiBaseUrl menjawab 200 dalam ${ms}ms');
+      return (ok: true, detail: '$baseUrl menjawab 200 dalam ${ms}ms');
     }
     return (
       ok: false,
-      detail: '$apiBaseUrl menjawab ${response.statusCode}. '
+      detail: '$baseUrl menjawab ${response.statusCode}. '
           'Alamat benar tetapi bukan mock API yang diharapkan.',
     );
   } on DioException catch (error) {
-    return (ok: false, detail: _explainDio(error, apiBaseUrl));
+    return (ok: false, detail: _explainDio(error, baseUrl));
   } catch (error) {
-    return (ok: false, detail: 'Gagal menghubungi $apiBaseUrl: $error');
+    return (ok: false, detail: 'Gagal menghubungi $baseUrl: $error');
   }
 }
 

@@ -120,8 +120,16 @@ flutter analyze
 flutter test
 ```
 
-`flutter test` menjalankan 55 unit/widget test. Uji integrasi ke mock API
-dipisah: `flutter test test/live_api_check.dart` (butuh server hidup).
+`flutter test` menjalankan 75 unit/widget test. Uji integrasi ke mock API
+dipisah karena butuh server hidup:
+
+```bash
+flutter test test/live_api_check.dart   # HttpAuthRepository vs server nyata
+flutter test test/login_flow_check.dart # alur login penuh di layar
+```
+
+Alamat backend juga bisa diatur langsung dari layar login (ketuk panel
+`Server: ...`), tanpa perlu menjalankan ulang dengan `--dart-define`.
 
 ### Kontrak API yang dipakai
 
@@ -149,9 +157,10 @@ di Xcode.
 | Pemeriksaan | Hasil |
 | --- | --- |
 | `flutter analyze` | 0 issue |
-| `flutter test` | 55 test lulus (4 file) |
-| `flutter build apk --debug` | Berhasil (`app-debug.apk`, 152 MB) |
+| `flutter test` | 75 test lulus (5 file) |
+| `flutter build apk --debug` | Berhasil (`app-debug.apk`) |
 | Uji integrasi mock API | 6 test lulus (`flutter test test/live_api_check.dart`) |
+| Uji alur login penuh | 5 test lulus (`flutter test test/login_flow_check.dart`) |
 | Uji tiga app state | Lihat `docs/fcm-test-matrix.md` |
 
 Detail pengujian, termasuk yang belum bisa dibuktikan, ada di

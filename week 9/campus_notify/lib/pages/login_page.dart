@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/server_config.dart';
 import '../providers/auth_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -13,15 +14,28 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _server = TextEditingController();
   bool _obscure = true;
   bool _testing = false;
+  bool _serverOpen = false;
   String? _error;
   String? _diagnostic;
+  String? _serverHint;
+
+  @override
+  void initState() {
+    super.initState();
+    _server.text = ref.read(serverUrlProvider);
+    // Alamat contoh berarti belum pernah diatur: buka panel server supaya
+    // pengguna langsung tahu harus mengisinya.
+    _serverOpen = isPlaceholderUrl(_server.text);
+  }
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _server.dispose();
     super.dispose();
   }
 
@@ -29,6 +43,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     setState(() {
       _error = null;
       _diagnostic = null;
+      _serverHint = null;
     });
     await ref
         .read(authStateProvider.notifier)
@@ -39,12 +54,33 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (state.hasError) {
       setState(() {
         _error = _friendly(state.error);
-        _diagnostic = describeAuthFailure(state.error, apiBaseUrl);
+        _diagnostic = describeAuthFailure(
+          state.error,
+          ref.read(serverUrlProvider),
+        );
       });
       return;
     }
     // Guard route di router memindahkan pengguna; rute tertunda dari notifikasi
     // dibuka oleh listener di `main.dart` setelah status login berubah.
+  }
+
+  /// Menyimpan alamat server yang diketik. Login berikutnya langsung memakai
+  /// alamat ini, tanpa perlu menjalankan ulang aplikasi dengan flag.
+  Future<void> _saveServer() async {
+    final ok = await ref.read(serverUrlProvider.notifier).save(_server.text);
+    if (!mounted) return;
+    if (!ok) {
+      setState(() => _serverHint = 'Alamat tidak sah. Contoh: http://10.0.2.2:8080');
+      return;
+    }
+    final saved = ref.read(serverUrlProvider);
+    _server.text = saved;
+    setState(() {
+      _serverHint = 'Tersimpan: $saved';
+      _diagnostic = null;
+      _error = null;
+    });
   }
 
   /// Menembak `GET /health` untuk memisahkan "server tidak terjangkau" dari
@@ -55,8 +91,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _testing = true;
       _diagnostic = null;
       _error = null;
+      _serverHint = null;
     });
-    final result = await pingApi(ref.read(authDioProvider));
+    final result = await pingApi(
+      ref.read(authDioProvider),
+      ref.read(serverUrlProvider),
+    );
     if (!mounted) return;
     setState(() {
       _testing = false;
@@ -80,8 +120,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final auth = ref.watch(authStateProvider);
     final theme = Theme.of(context);
     final error = _error ?? (auth.hasError ? _friendly(auth.error) : null);
-    final diagnostic =
-        _diagnostic ?? (auth.hasError ? describeAuthFailure(auth.error, apiBaseUrl) : null);
+    final diagnostic = _diagnostic ??
+        (auth.hasError
+            ? describeAuthFailure(auth.error, ref.read(serverUrlProvider))
+            : null);
 
     return Scaffold(
       body: Center(
@@ -98,8 +140,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   'Masuk untuk menerima pengumuman kampus.',
                   style: theme.textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
+                _serverPanel(theme),
+                const SizedBox(height: 24),
                 TextField(
+                  key: const Key('email'),
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
@@ -112,6 +157,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 16),
                 TextField(
+                  key: const Key('password'),
                   controller: _password,
                   obscureText: _obscure,
                   textInputAction: TextInputAction.done,
@@ -152,17 +198,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ],
                 if (diagnostic != null) ...[
                   const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: SelectableText(
-                      diagnostic,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ),
+                  _note(theme, diagnostic, selectable: true),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(
@@ -177,7 +213,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
-                  onPressed: (_testing || auth.isLoading) ? null : _testConnection,
+                  onPressed:
+                      (_testing || auth.isLoading) ? null : _testConnection,
                   icon: _testing
                       ? const SizedBox(
                           height: 16,
@@ -195,20 +232,124 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       : 'Masuk memakai akun kampus Anda.',
                   style: theme.textTheme.bodySmall,
                 ),
-                const SizedBox(height: 4),
-                // Ditampilkan supaya salah set --dart-define langsung terlihat,
-                // bukan jadi tebakan.
-                SelectableText(
-                  'Server: $apiBaseUrl',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _serverPanel(ThemeData theme) {
+    final current = ref.watch(serverUrlProvider);
+    final placeholder = isPlaceholderUrl(current);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: placeholder
+            ? theme.colorScheme.errorContainer.withValues(alpha: 0.4)
+            : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _serverOpen = !_serverOpen),
+            child: Row(
+              children: [
+                Icon(
+                  placeholder ? Icons.warning_amber : Icons.dns_outlined,
+                  size: 18,
+                  color: placeholder ? theme.colorScheme.error : null,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Server: $current',
+                    style: theme.textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(
+                  _serverOpen ? Icons.expand_less : Icons.expand_more,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+          if (placeholder)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 26),
+              child: Text(
+                'Alamat contoh belum diganti. Isi alamat backend lalu tekan '
+                'Simpan, atau login tidak akan pernah berhasil.',
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.colorScheme.error),
+              ),
+            ),
+          if (_serverOpen) ...[
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('server'),
+              controller: _server,
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                labelText: 'Alamat server',
+                hintText: 'http://10.0.2.2:8080',
+                helperText: 'Emulator: 10.0.2.2 · HP fisik: IP laptop',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              onSubmitted: (_) => _saveServer(),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.tonal(
+                    onPressed: _saveServer,
+                    child: const Text('Simpan'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      await ref.read(serverUrlProvider.notifier).reset();
+                      if (!mounted) return;
+                      _server.text = ref.read(serverUrlProvider);
+                      setState(() => _serverHint = 'Dikembalikan ke default.');
+                    },
+                    child: const Text('Reset'),
+                  ),
+                ),
+              ],
+            ),
+            if (_serverHint != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(_serverHint!, style: theme.textTheme.bodySmall),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _note(ThemeData theme, String text, {bool selectable = false}) {
+    final style = theme.textTheme.bodySmall;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: selectable
+          ? SelectableText(text, style: style)
+          : Text(text, style: style),
     );
   }
 }
